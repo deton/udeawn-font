@@ -11,7 +11,7 @@ fi
 VERSION="$1"
 FAMILYNAME="$2"
 DISP_FAMILYNAME="$3"
-DISP_FAMILYNAME_JP="UDEV ゴシック"
+DISP_FAMILYNAME_JP="UDEV ゴシック低"
 LIGA_FLAG="$4"  # 0: リガチャなし 1: リガチャあり
 JPDOC_FLAG="$5"  # 0: JetBrains Monoの記号優先 1: 日本語ドキュメントで使用頻度の高い記号はBIZ UDゴシック優先
 NERD_FONTS_FLAG="$6"  # 0: Nerd Fonts なし 1: Nerd Fonts あり
@@ -22,8 +22,10 @@ EM_ASCENT=1802
 EM_DESCENT=246
 EM=$(($EM_ASCENT + $EM_DESCENT))
 
-ASCENT=$(($EM_ASCENT + 160))
-DESCENT=$(($EM_DESCENT + 170))
+#ASCENT=$(($EM_ASCENT + 160))
+#DESCENT=$(($EM_DESCENT + 170))
+ASCENT=$EM_ASCENT
+DESCENT=$EM_DESCENT
 TYPO_LINE_GAP=0
 
 ORIG_FULL_WIDTH=2048
@@ -518,7 +520,7 @@ elseif (${W35_FLAG} == 1)
 endif
 _EOT_
 
-/usr/local/bin/fontforge -script ${WORK_DIR}/${GEN_SCRIPT_JBMONO}
+fontforge -script ${WORK_DIR}/${GEN_SCRIPT_JBMONO}
 
 for f in `ls "${WORK_DIR}/${FAMILYNAME}"*.ttf`
 do
