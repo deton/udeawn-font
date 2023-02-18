@@ -10,14 +10,14 @@ FONT_PATTERN=${PREFIX}${FAMILYNAME}'*.ttf'
 COPYRIGHT='[BIZ UDGothic]
 Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)
 
-[JetBrains Mono]
-Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
-
-[Nerd Fonts]
-Copyright (c) 2014, Ryan L McIntyre (https://ryanlmcintyre.com).
+[Illusion]
+Copyright 2019 Tomohiro Matsushima (https://github.com/tomonic-x/Illusion)
 
 [UDEV Gothic]
-Copyright (c) 2022, Yuko Otawara'
+Copyright (c) 2022, Yuko Otawara
+
+[UDEAWN]
+Copyright (c) 2023 KIHARA, Hideto'
 
 for P in ${BASE_DIR}/${FONT_PATTERN}
 do
