@@ -32,8 +32,10 @@ ORIG_FULL_WIDTH=2048
 ORIG_HALF_WIDTH=$(($ORIG_FULL_WIDTH / 2))
 
 HALF_WIDTH=$(($EM / 2))
-SHRINK_X=90
-SHRINK_Y=99
+#SHRINK_X=90
+#SHRINK_Y=99
+SHRINK_X=100
+SHRINK_Y=97
 
 ITALIC_ANGLE=-9
 
@@ -49,12 +51,12 @@ fi
 
 FONTS_DIRECTORIES="${BASE_DIR}/source/"
 
-SRC_FONT_JBMONO_REGULAR='JetBrainsMonoNL-Regular.ttf'
-SRC_FONT_JBMONO_BOLD='JetBrainsMonoNL-Bold.ttf'
+SRC_FONT_JBMONO_REGULAR='Illusion-N-Regular.ttf'
+SRC_FONT_JBMONO_BOLD='Illusion-N-Bold.ttf'
 if [ "$LIGA_FLAG" == 0 -a "$ITALIC_FLAG" == 1 ]
 then
-  SRC_FONT_JBMONO_REGULAR='JetBrainsMonoNL-Italic.ttf'
-  SRC_FONT_JBMONO_BOLD='JetBrainsMonoNL-BoldItalic.ttf'
+  SRC_FONT_JBMONO_REGULAR='Illusion-N-Italic.ttf'
+  SRC_FONT_JBMONO_BOLD='Illusion-N-BoldItalic.ttf'
 elif [ "$LIGA_FLAG" == 1 -a "$ITALIC_FLAG" == 0 ]
 then
   SRC_FONT_JBMONO_REGULAR='JetBrainsMono-Regular.ttf'
