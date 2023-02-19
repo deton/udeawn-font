@@ -4,10 +4,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Install packages
-        run: sudo apt-get install -y ttfautohint fontforge
+        run: sudo apt-get install -y ttfautohint fontforge python2
 
       - name: Install python packages
-        run: sudo python3 -m pip install fonttools==3.44.0 ttfautohint-py
+        run: |
+          sudo python2 -m pip install fonttools
+          sudo python3 -m pip install ttfautohint-py
 
       - uses: actions/checkout@v3
 

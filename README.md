@@ -16,7 +16,7 @@ https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
   * fontforge: 20201107
 
 ```sh
-sudo apt-get install ttfautohint python3-pip fontforge python2 python2-pip-whl
+sudo apt-get install ttfautohint fontforge python2 python2-pip-whl
 sudo python2 /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl/pip install --no-index /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl
 sudo pip2 install fonttools
 python3 -m pip install ttfautohint-py
