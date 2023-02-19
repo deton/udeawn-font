@@ -16,9 +16,13 @@ https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
   * fontforge: 20201107
 
 ```sh
-sudo apt-get install ttfautohint python3-pip fontforge python2 python2-pip-whl
-sudo python2 /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl/pip install --no-index /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl
-sudo pip2 install fonttools
+sudo apt-get install ttfautohint fontforge python2 python2-pip-whl
+python2 /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl/pip install --no-index /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl
+python2 -m pip install fonttools
+python3 -m pip install ttfautohint-py
 ```
+
+`pyftmerge`や`ttx`は、`$HOME/.local/bin`に入るので、
+PATHに`$HOME/.local/bin`を入れている想定。
 
 [HackGenのビルドツールインストール方法を参考](https://github.com/yuru7/HackGen#%E3%83%93%E3%83%AB%E3%83%89%E3%83%84%E3%83%BC%E3%83%AB%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%96%B9%E6%B3%95%E3%81%A8%E6%B3%A8%E6%84%8F%E7%82%B9)
