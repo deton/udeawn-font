@@ -104,7 +104,111 @@ while (i < SizeOf(input_list))
     endif
   endloop
 
-  # BIZ UDゴシックから削除するEast Asian Ambiguousグリフリストの作成
+  # Illusion-Nが含んでいるグリフリストの作成
+  array_end = 65535
+  exist_glyph_array = Array(array_end)
+  j = 0
+  while (j < array_end)
+    if (WorthOutputting(j))
+      exist_glyph_array[j] = 1
+    else
+      exist_glyph_array[j] = 0
+    endif
+    j++
+  endloop
+
+  # パスの小数点以下を切り捨て
+  SelectWorthOutputting()
+  RoundToInt()
+
+  # 修正後のフォントファイルを保存
+  Print("Save " + output_list[i])
+  Save("${WORK_DIR}/" + output_list[i])
+  Close()
+
+  # 出力フォントファイルの作成
+  New()
+  Reencode("unicode")
+  ScaleToEm(${EM_ASCENT}, ${EM_DESCENT})
+
+  MergeFonts("${WORK_DIR}/" + output_list[i])
+
+  Print("Save " + output_list[i])
+  SetOS2Value("Weight", fontweight_list[i]) # Book or Bold
+  SetOS2Value("Width",                   5) # Medium
+  SetOS2Value("FSType",                  0)
+  SetOS2Value("VendorID",           "twr")
+  SetOS2Value("IBMFamily",            2057) # SS Typewriter Gothic
+  SetOS2Value("WinAscentIsOffset",       0)
+  SetOS2Value("WinDescentIsOffset",      0)
+  SetOS2Value("TypoAscentIsOffset",      0)
+  SetOS2Value("TypoDescentIsOffset",     0)
+  SetOS2Value("HHeadAscentIsOffset",     0)
+  SetOS2Value("HHeadDescentIsOffset",    0)
+  SetOS2Value("WinAscent",             ${ASCENT})
+  SetOS2Value("WinDescent",            ${DESCENT})
+  SetOS2Value("TypoAscent",            ${ASCENT})
+  SetOS2Value("TypoDescent",          -${DESCENT})
+  SetOS2Value("TypoLineGap",           ${TYPO_LINE_GAP})
+  SetOS2Value("HHeadAscent",           ${ASCENT})
+  SetOS2Value("HHeadDescent",         -${DESCENT})
+  SetOS2Value("HHeadLineGap",            0)
+  SetPanose([2, 11, panoseweight_list[i], 9, 2, 2, 3, 2, 2, 7])
+
+  fontname_style = fontstyle_list[i]
+  # 斜体の設定
+  if (Strstr(fontstyle_list[i], 'Italic') >= 0)
+    SetItalicAngle(${ITALIC_ANGLE})
+    if (Strstr(fontstyle_list[i], ' Italic') >= 0)
+      splited_style = StrSplit(fontstyle_list[i], " ")
+      fontname_style = splited_style[0] + splited_style[1]
+    endif
+  endif
+
+  fontfamily = "$FAMILYNAME"
+  disp_fontfamily = "$DISP_FAMILYNAME"
+  base_style = fontstyle_list[i]
+  copyright = "###COPYRIGHT###"
+  version = "$VERSION"
+
+  # TTF名設定 - 英語
+  SetTTFName(0x409, 0, copyright)
+  SetTTFName(0x409, 1, disp_fontfamily)
+  SetTTFName(0x409, 2, fontstyle_list[i])
+  SetTTFName(0x409, 3, disp_fontfamily + " : " + Strftime("%d-%m-%Y", 0))
+  SetTTFName(0x409, 4, disp_fontfamily + " " + fontstyle_list[i])
+  SetTTFName(0x409, 5, version)
+  SetTTFName(0x409, 6, fontfamily + "-" + fontname_style)
+  # TTF名設定 - 日本語
+  # SetTTFName(0x411, 1, "${DISP_FAMILYNAME_JP}")
+  # SetTTFName(0x411, 2, fontstyle_list[i])
+  # SetTTFName(0x411, 3, "FontForge 2.0 : " + \$fullname + " : " + Strftime("%d-%m-%Y", 0))
+  # SetTTFName(0x411, 4, "${DISP_FAMILYNAME_JP}" + " " + fontstyle_list[i])
+
+  #Generate("${WORK_DIR}/" + output_list[i], '')
+  Generate("${WORK_DIR}/" + fontfamily + "-" + fontname_style + ".ttf", "")
+  Close()
+
+  i += 1
+endloop
+
+# BIZ UDゴシックの調整
+input_list = ["${PATH_BIZUD_REGULAR}", "${PATH_BIZUD_BOLD}"]
+output_list = ["${MODIFIED_FONT_BIZUD_REGULAR}", "${MODIFIED_FONT_BIZUD_BOLD}"]
+
+i = 0
+while (i < SizeOf(input_list))
+  New()
+  Reencode("unicode")
+  ScaleToEm(${EM_ASCENT}, ${EM_DESCENT})
+
+  MergeFonts(input_list[i])
+
+  SelectWorthOutputting()
+  UnlinkReference()
+
+  # East Asian Ambiguousなグリフのうち、Illusion-Nにあるものは
+  # BIZ UDゴシックから削除。Illusion-Nにないものは半分幅にする。
   # https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
   eaw_array = [ \\
     0x00A1, 0x00A4, 0x00A7, 0x00A8, 0x00AA, 0x00AD, 0x00AE, 0x00B0, 0x00B1, \\
@@ -217,132 +321,55 @@ while (i < SizeOf(input_list))
     0x0001F19C, 0x0001F19D, 0x0001F19E, 0x0001F19F, 0x0001F1A0, 0x0001F1A1, \\
     0x0001F1A2, 0x0001F1A3, 0x0001F1A4, 0x0001F1A5, 0x0001F1A6, 0x0001F1A7, \\
     0x0001F1A8, 0x0001F1A9, 0x0001F1AA, 0x0001F1AB, 0x0001F1AC]
-  array_end = SizeOf(eaw_array)
-  exist_glyph_array = Array(array_end)
-  SelectNone()
+  eaw_end = SizeOf(eaw_array)
   j = 0
+  k = 0
   while (j < array_end)
-    ucode = eaw_array[j]
-    if (WorthOutputting(ucode))
-      SelectMore(ucode)
-      exist_glyph_array[j] = 1
-    else
-      exist_glyph_array[j] = 0
+    if (WorthOutputting(j))
+      Select(j)
+      ineaw = 0
+      while (k < eaw_end)
+        if (eaw_array[k] == j)
+          ineaw = 1
+          break
+        elseif (eaw_array[k] > j)
+          break
+        endif
+        k++
+      endloop
+      if (ineaw == 1)
+        # BIZ UDゴシックに含まれているambiguous文字は、
+        if (exist_glyph_array[j] == 1)
+          # Illusion-Nに含まれているグリフであればそれを使うために削除
+          Clear()
+        else
+          # Illusion-Nに含まれていないグリフは半分幅にする
+          w = GlyphInfo("Width")
+          if (w > 0 && w > ${HALF_WIDTH})
+            Scale(50, 100, 0, 0)
+            SetWidth(${HALF_WIDTH}, 0)
+          endif
+        endif
+      # BIZ UDゴシックに含まれている、ambiguous以外の文字はそのまま使用
+      endif
+    # BIZ UDゴシックに含まれてなくて、
+    # Illusion-Nに含まれている文字があればマージする
     endif
     j++
   endloop
-  # Illusion-NがEast Asian Ambiguousのみを含むようにするため、それ以外を削除
-  SelectInvert(); Clear()
-
-  # パスの小数点以下を切り捨て
-  SelectWorthOutputting()
-  RoundToInt()
-
-  # 修正後のフォントファイルを保存
-  Print("Save " + output_list[i])
-  Save("${WORK_DIR}/" + output_list[i])
-  Close()
-
-  # 出力フォントファイルの作成
-  New()
-  Reencode("unicode")
-  ScaleToEm(${EM_ASCENT}, ${EM_DESCENT})
-
-  MergeFonts("${WORK_DIR}/" + output_list[i])
-
-  Print("Save " + output_list[i])
-  SetOS2Value("Weight", fontweight_list[i]) # Book or Bold
-  SetOS2Value("Width",                   5) # Medium
-  SetOS2Value("FSType",                  0)
-  SetOS2Value("VendorID",           "twr")
-  SetOS2Value("IBMFamily",            2057) # SS Typewriter Gothic
-  SetOS2Value("WinAscentIsOffset",       0)
-  SetOS2Value("WinDescentIsOffset",      0)
-  SetOS2Value("TypoAscentIsOffset",      0)
-  SetOS2Value("TypoDescentIsOffset",     0)
-  SetOS2Value("HHeadAscentIsOffset",     0)
-  SetOS2Value("HHeadDescentIsOffset",    0)
-  SetOS2Value("WinAscent",             ${ASCENT})
-  SetOS2Value("WinDescent",            ${DESCENT})
-  SetOS2Value("TypoAscent",            ${ASCENT})
-  SetOS2Value("TypoDescent",          -${DESCENT})
-  SetOS2Value("TypoLineGap",           ${TYPO_LINE_GAP})
-  SetOS2Value("HHeadAscent",           ${ASCENT})
-  SetOS2Value("HHeadDescent",         -${DESCENT})
-  SetOS2Value("HHeadLineGap",            0)
-  SetPanose([2, 11, panoseweight_list[i], 9, 2, 2, 3, 2, 2, 7])
-
-  fontname_style = fontstyle_list[i]
-  # 斜体の設定
-  if (Strstr(fontstyle_list[i], 'Italic') >= 0)
-    SetItalicAngle(${ITALIC_ANGLE})
-    if (Strstr(fontstyle_list[i], ' Italic') >= 0)
-      splited_style = StrSplit(fontstyle_list[i], " ")
-      fontname_style = splited_style[0] + splited_style[1]
-    endif
-  endif
-
-  fontfamily = "$FAMILYNAME"
-  disp_fontfamily = "$DISP_FAMILYNAME"
-  base_style = fontstyle_list[i]
-  copyright = "###COPYRIGHT###"
-  version = "$VERSION"
-
-  # TTF名設定 - 英語
-  SetTTFName(0x409, 0, copyright)
-  SetTTFName(0x409, 1, disp_fontfamily)
-  SetTTFName(0x409, 2, fontstyle_list[i])
-  SetTTFName(0x409, 3, disp_fontfamily + " : " + Strftime("%d-%m-%Y", 0))
-  SetTTFName(0x409, 4, disp_fontfamily + " " + fontstyle_list[i])
-  SetTTFName(0x409, 5, version)
-  SetTTFName(0x409, 6, fontfamily + "-" + fontname_style)
-  # TTF名設定 - 日本語
-  # SetTTFName(0x411, 1, "${DISP_FAMILYNAME_JP}")
-  # SetTTFName(0x411, 2, fontstyle_list[i])
-  # SetTTFName(0x411, 3, "FontForge 2.0 : " + \$fullname + " : " + Strftime("%d-%m-%Y", 0))
-  # SetTTFName(0x411, 4, "${DISP_FAMILYNAME_JP}" + " " + fontstyle_list[i])
-
-  #Generate("${WORK_DIR}/" + output_list[i], '')
-  Generate("${WORK_DIR}/" + fontfamily + "-" + fontname_style + ".ttf", "")
-  Close()
-
-  i += 1
-endloop
-
-# BIZ UDゴシックの調整
-input_list = ["${PATH_BIZUD_REGULAR}", "${PATH_BIZUD_BOLD}"]
-output_list = ["${MODIFIED_FONT_BIZUD_REGULAR}", "${MODIFIED_FONT_BIZUD_BOLD}"]
-
-i = 0
-while (i < SizeOf(input_list))
-  New()
-  Reencode("unicode")
-  ScaleToEm(${EM_ASCENT}, ${EM_DESCENT})
-
-  MergeFonts(input_list[i])
-
-  SelectWorthOutputting()
-  UnlinkReference()
-
-  # East Asian Ambiguousなグリフのうち、Illusion-Nにあるものは
-  # BIZ UDゴシックから削除。Illusion-Nにないものは半分幅にする。
-  j = 0
-  while (j < array_end)
-    ucode = eaw_array[j]
+  # array_end(65535)以降のambiguous文字が含まれていれば半分幅にする
+  while (k < eaw_end)
+    ucode = eaw_array[k]
     if (WorthOutputting(ucode))
       Select(ucode)
-      if (exist_glyph_array[j] == 1)
-        Clear()
-      else
-        w = GlyphInfo("Width")
-        if (w > 0 && w > ${HALF_WIDTH})
-          # 幅を半分にする
-          Scale(50, 100, 0, 0)
-          SetWidth(${HALF_WIDTH}, 0)
-        endif
+      w = GlyphInfo("Width")
+      if (w > 0 && w > ${HALF_WIDTH})
+        # 幅を半分にする
+        Scale(50, 100, 0, 0)
+        SetWidth(${HALF_WIDTH}, 0)
       endif
     endif
-    j++
+    k++
   endloop
 
   # 斜体に変形
