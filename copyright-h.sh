@@ -10,9 +10,6 @@ FONT_PATTERN=${PREFIX}${FAMILYNAME}'*.ttf'
 COPYRIGHT='[BIZ UDGothic]
 Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)
 
-[UDEV Gothic]
-Copyright (c) 2022, Yuko Otawara
-
 [UDEAWN]
 Copyright (c) 2023 KIHARA, Hideto'
 
