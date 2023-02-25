@@ -66,6 +66,40 @@ while (i < SizeOf(input_list))
   UnlinkReference()
 
   # East Asian Ambiguousなグリフの幅を半分にする
+  # ただし、元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う
+  eaw_useright = [0x2018, 0x201C]
+  eaw_useleft = [0x00B0, 0x2019, 0x201D, 0x2032, 0x2033]
+  # 右半分だけにする
+  array_end = SizeOf(eaw_useright)
+  j = 0
+  while (j < array_end)
+    ucode = eaw_useright[j]
+    if (WorthOutputting(ucode))
+      Select(ucode)
+      w = GlyphInfo("Width")
+      if (w > 0 && w > ${HALF_WIDTH})
+        Move(-${HALF_WIDTH}, 0)
+        SetWidth(${HALF_WIDTH}, 0)
+      endif
+    endif
+    j++
+  endloop
+
+  # 左半分だけにする
+  array_end = SizeOf(eaw_useleft)
+  j = 0
+  while (j < array_end)
+    ucode = eaw_useleft[j]
+    if (WorthOutputting(ucode))
+      Select(ucode)
+      w = GlyphInfo("Width")
+      if (w > 0 && w > ${HALF_WIDTH})
+        SetWidth(${HALF_WIDTH}, 0)
+      endif
+    endif
+    j++
+  endloop
+
   # https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
   eaw_array = [ \\
     0x00A1, 0x00A4, 0x00A7, 0x00A8, 0x00AA, 0x00AD, 0x00AE, 0x00B0, 0x00B1, \\
@@ -188,7 +222,7 @@ while (i < SizeOf(input_list))
       if (w > 0 && w > ${HALF_WIDTH})
         # 幅を半分にする
         Scale(${SHRINK_X}, ${SHRINK_Y}, 0, 0)
-        SetWidth(${ORIG_HALF_WIDTH}, 0)
+        SetWidth(${HALF_WIDTH}, 0)
       endif
     endif
     j++

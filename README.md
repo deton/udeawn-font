@@ -11,7 +11,7 @@ https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 ![udeawn](https://user-images.githubusercontent.com/761487/220837764-7cb16f09-4249-4f91-b6d6-e9edaa5db21c.png)
 
 ## UDEAWH font
-BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分の幅に縮めためもの。
+BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分の幅に縮めたもの。
 
 単に縮めているので、縦線が細めです。丸数字等が縦長です。
 
