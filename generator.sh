@@ -324,7 +324,8 @@ while (i < SizeOf(input_list))
   SelectWorthOutputting()
   UnlinkReference()
 
-  # East Asian AmbiguousなグリフをBIZ UDゴシックから削除
+  # East Asian Ambiguousなグリフのうち、Illusion-Nにあるものは
+  # BIZ UDゴシックから削除。Illusion-Nにないものは半分幅にする。
   j = 0
   while (j < array_end)
     ucode = eaw_array[j]
@@ -332,6 +333,13 @@ while (i < SizeOf(input_list))
       Select(ucode)
       if (exist_glyph_array[j] == 1)
         Clear()
+      else
+        w = GlyphInfo("Width")
+        if (w > 0 && w > ${HALF_WIDTH})
+          # 幅を半分にする
+          Scale(50, 100, 0, 0)
+          SetWidth(${HALF_WIDTH}, 0)
+        endif
       endif
     endif
     j++
