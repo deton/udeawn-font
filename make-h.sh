@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 BASE_DIR=$(cd $(dirname $0); pwd)
 WORK_DIR="$BASE_DIR/build_tmp"

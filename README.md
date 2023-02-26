@@ -1,21 +1,23 @@
 # UDEAWN/UDEAWH font
 
 ## UDEAWN font
-BIZ UDゴシック内のEast Asian Ambiguous文字のみをNarrowフォント([Illusion-N](https://github.com/tomonic-x/Illusion))に置き換えたもの。
+BIZ UDゴシック内のEast Asian Ambiguous文字のみをNarrowにしたもの。
++ [Illusion-N](https://github.com/tomonic-x/Illusion)に含まれるEast Asian Ambiguous文字ならば、それに置き換え。
++ Illusion-Nに含まれないEast Asian Ambiguous文字は、FontForgeで半分幅に縮小。
 
 [UDEV Gothic](https://github.com/yuru7/udev-gothic) の生成スクリプトを改造。
 
 East Asian Ambiguous文字のリストは以下を参考に使用。
 https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 
-![udeawn](https://user-images.githubusercontent.com/761487/220837764-7cb16f09-4249-4f91-b6d6-e9edaa5db21c.png)
+![udeawn](https://user-images.githubusercontent.com/761487/221395258-6d235c7a-2c90-4344-877b-ec549f9808c3.png)
 
 ## UDEAWH font
-BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分の幅に縮めたもの。
+BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
 
 単に縮めているので、縦線が細めです。丸数字等が縦長です。
 
-![udeawh](https://user-images.githubusercontent.com/761487/220837746-f96212c7-19c0-497b-9cfe-f2b1932cc805.png)
+![udeawh](https://user-images.githubusercontent.com/761487/221395252-e00bd075-fe9c-44e5-a1bc-ec54006f756c.png)
 
 ## ビルド環境
 
