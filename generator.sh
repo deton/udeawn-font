@@ -78,7 +78,10 @@ endif
 fontweight_list = [400, 700]
 panoseweight_list = [5, 8]
 
-# East Asian Ambiguousのリスト
+# East Asian Ambiguousのリスト (ソート済の必要あり)
+# のうち、BIZ UDゴシックで元々半分幅に収まっている文字
+eaw_useright = [0x2018, 0x201C]
+eaw_useleft = [0x00B0, 0x2019, 0x201D, 0x2032, 0x2033]
 # https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 eaw_array = [ \\
   0x00A1, 0x00A4, 0x00A7, 0x00A8, 0x00AA, 0x00AD, 0x00AE, 0x00B0, 0x00B1, \\
@@ -219,22 +222,50 @@ while (i < SizeOf(input_list))
     endif
   endloop
 
-  # BIZ UDゴシックから削除するEast Asian Ambiguousグリフリストの作成
-  array_end = SizeOf(eaw_array)
-  exist_glyph_array = Array(array_end)
+  # Illusion-Nに含まれるEast Asian Ambiguousグリフリストの作成
+  eaw_end = SizeOf(eaw_array)
+  useillu = Array(eaw_end)
+  eawright_end = SizeOf(eaw_useright)
+  eawleft_end = SizeOf(eaw_useleft)
   SelectNone()
   j = 0
-  while (j < array_end)
+  idxright = 0
+  idxleft = 0
+  while (j < eaw_end)
     ucode = eaw_array[j]
     if (WorthOutputting(ucode))
       SelectMore(ucode)
-      exist_glyph_array[j] = 1
+      useillu[j] = 1
+
+      # BIZ UDゴシックで元々半分幅に収まっている文字は、Illusion-Nでなく
+      # 半分領域をそのまま使う
+      while (idxright < eawright_end)
+        if (eaw_useright[idxright] == ucode)
+          SelectFewer(ucode)
+          useillu[j] = -1
+          break
+        elseif (eaw_useright[idxright] > ucode)
+          break
+        endif
+        idxright++
+      endloop
+      while (idxleft < eawleft_end)
+        if (eaw_useleft[idxleft] == ucode)
+          SelectFewer(ucode)
+          useillu[j] = -2
+          break
+        elseif (eaw_useleft[idxleft] > ucode)
+          break
+        endif
+        idxleft++
+      endloop
     else
-      exist_glyph_array[j] = 0
+      useillu[j] = 0
     endif
     j++
   endloop
   # Illusion-NがEast Asian Ambiguousのみを含むようにするため、それ以外を削除
+  # (ASCII範囲の文字等はBIZ UDゴシックをそのまま使うため)
   SelectInvert(); Clear()
 
   # パスの小数点以下を切り捨て
@@ -329,17 +360,29 @@ while (i < SizeOf(input_list))
 
   # East Asian Ambiguousなグリフのうち、Illusion-Nにあるものは
   # BIZ UDゴシックから削除。Illusion-Nにないものは半分幅にする。
+  # ただし、BIZ UDゴシックで元々半分幅な文字は半分領域をそのまま使う。
   j = 0
-  while (j < array_end)
+  while (j < eaw_end)
     ucode = eaw_array[j]
     if (WorthOutputting(ucode))
       Select(ucode)
-      if (exist_glyph_array[j] == 1)
+      w = GlyphInfo("Width")
+      if (useillu[j] == 1)
         Clear()
-      else
-        w = GlyphInfo("Width")
+      elseif (useillu[j] == -1)
+        # 右半分だけにする
         if (w > 0 && w > ${HALF_WIDTH})
-          # 幅を半分にする
+          Move(-${HALF_WIDTH}, 0)
+          SetWidth(${HALF_WIDTH}, 0)
+        endif
+      elseif (useillu[j] == -2)
+        # 左半分だけにする
+        if (w > 0 && w > ${HALF_WIDTH})
+          SetWidth(${HALF_WIDTH}, 0)
+        endif
+      else
+        # 文字幅を半分に縮める
+        if (w > 0 && w > ${HALF_WIDTH})
           Scale(50, 100, 0, 0)
           SetWidth(${HALF_WIDTH}, 0)
         endif
