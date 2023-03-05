@@ -34,13 +34,8 @@ ITALIC_ANGLE=-9
 
 FONTS_DIRECTORIES="${BASE_DIR}/source/"
 
-SRC_FONT_ILLU_REGULAR='Illusion-N-Regular.ttf'
-SRC_FONT_ILLU_BOLD='Illusion-N-Bold.ttf'
-if [ "$ITALIC_FLAG" == 1 ]
-then
-  SRC_FONT_ILLU_REGULAR='Illusion-N-Italic.ttf'
-  SRC_FONT_ILLU_BOLD='Illusion-N-BoldItalic.ttf'
-fi
+SRC_FONT_ILLU_REGULAR='Illusion-Regular.ttc'
+SRC_FONT_ILLU_BOLD='Illusion-Bold.ttc'
 SRC_FONT_BIZUD_REGULAR='fontforge_export_BIZUDGothic-Regular.ttf'
 SRC_FONT_BIZUD_BOLD='fontforge_export_BIZUDGothic-Bold.ttf'
 
@@ -69,7 +64,10 @@ GEN_SCRIPT_ILLU='gen_script_illu.pe'
 cat > "${WORK_DIR}/${GEN_SCRIPT_ILLU}" << _EOT_
 
 # Set parameters
-input_list = ["${PATH_ILLU_REGULAR}", "${PATH_ILLU_BOLD}"]
+input_list = ["${PATH_ILLU_REGULAR}(Illusion N)", "${PATH_ILLU_BOLD}(Illusion N Bold)"]
+if (${ITALIC_FLAG} == 1)
+  input_list = ["${PATH_ILLU_REGULAR}(Illusion N Italic)", "${PATH_ILLU_BOLD}(Illusion N Bold Italic)"]
+endif
 output_list = ["${MODIFIED_FONT_ILLU_REGULAR}", "${MODIFIED_FONT_ILLU_BOLD}"]
 fontstyle_list    = ["Regular", "Bold"]
 if (${ITALIC_FLAG} == 1)
