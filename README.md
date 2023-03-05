@@ -2,18 +2,22 @@
 
 ## UDEAWN font
 BIZ UDゴシック内のEast Asian Ambiguous文字のみをNarrowにしたもの。
-+ [Illusion-N](https://github.com/tomonic-x/Illusion)に含まれるEast Asian Ambiguous文字ならば、それに置き換え。
-+ Illusion-Nに含まれないEast Asian Ambiguous文字は、FontForgeで半分幅に縮小。
+
+East Asian Ambiguous文字に関して、
++ BIZ UDゴシックで元々半分幅に収まっている文字は、半分領域をそのまま使用。
++ [Illusion-N](https://github.com/tomonic-x/Illusion)に含まれる文字は、Illusion-Nに置き換え。
++ Illusion-Nに含まれない文字は、FontForgeで半分幅に縮小。
 
 [UDEV Gothic](https://github.com/yuru7/udev-gothic) の生成スクリプトを改造。
 
 East Asian Ambiguous文字のリストは以下を参考に使用。
 https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 
-![udeawn](https://user-images.githubusercontent.com/761487/221395258-6d235c7a-2c90-4344-877b-ec549f9808c3.png)
+![udeawn](https://user-images.githubusercontent.com/761487/222949949-fe8dfa6d-582a-4276-8d3c-bbaf7fa08059.png)
 
 ## UDEAWH font
 BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
+(ただし、元々半分幅に収まっている文字は、縮めずに半分領域をそのまま使用。)
 
 単に縮めているので、縦線が細めです。丸数字等が縦長です。
 
