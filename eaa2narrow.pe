@@ -132,6 +132,25 @@ halfWidth = GlyphInfo("Width")
 
 # East Asian Ambiguousなグリフの幅を半分にする。
 # ただし、元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
+
+#Select(0u2190) # ←
+#Move(-145, 0)
+#SetWidth(halfWidth, 0)
+#Select(0u2192) # →
+#Move(-1169, 0)
+#SetWidth(halfWidth, 0)
+Select(0u2191) # ↑
+Move(-512, 0)
+SetWidth(halfWidth, 0)
+Select(0u2193) # ↓
+Move(-512, 0)
+SetWidth(halfWidth, 0)
+
+#Select(0u03b1, 0u03b2) # α,β
+#Move(-250, 0)
+#Scale(70, 100, 0, 0)
+#SetWidth(halfWidth, 0)
+
 # 右半分だけにする
 array_end = SizeOf(eaw_useright)
 j = 0
