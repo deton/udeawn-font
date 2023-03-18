@@ -2,7 +2,7 @@
 
 wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等をNarrowにしたフォントです。
 
-また、UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)で[NarrowなのにBIZ UDゴシックではWideな文字](/deton/udeawn-font/blob/main/WidthMismatch.txt)も、FontForgeで半分幅に縮小。
+また、UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)でNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小。
 (端末エミュレータ側が想定する幅と合わなくて、文字が重なって読みにくいので)
 
 ## UDEAWN font
