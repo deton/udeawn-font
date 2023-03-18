@@ -29,10 +29,10 @@ then
   exit 1
 fi
 
-fontforge -script eaa2narrow.pe "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION"
 mv "${FAMILYNAME}-Regular.ttf" "${WORK_DIR}"
 
-fontforge -script eaa2narrow.pe "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION"
 mv "${FAMILYNAME}-Bold.ttf" "${WORK_DIR}"
 
 #for f in `ls "${WORK_DIR}/${FAMILYNAME}"*.ttf`
