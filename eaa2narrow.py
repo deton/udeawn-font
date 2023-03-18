@@ -168,9 +168,13 @@ def main(fontfile, fontfamily, fontstyle, version):
             continue
         w = g.width
         if w > 0 and w > halfWidth:
-            g.width = halfWidth
-            # 文字幅を半分に縮める
-            g.transform(psMat.scale(0.5, 1.0))
+            bbox = g.boundingBox()
+            boxw = bbox[2] - bbox[0]
+            if boxw > halfWidth:
+                # 文字幅を半分に縮める
+                g.transform(psMat.scale(0.5, 1.0))
+            else:
+                g.transform(psMat.translate(-halfWidth / 2, 0))
             g.width = halfWidth
 
     # 修正後のフォントファイルを保存
