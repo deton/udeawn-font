@@ -1,7 +1,12 @@
 # UDEAWN/UDEAWH font
 
+wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等をNarrowにしたフォントです。
+
+また、UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)でNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小。
+(端末エミュレータ側が想定する幅と合わなくて、文字が重なって読みにくいので)
+
 ## UDEAWN font
-BIZ UDゴシック内のEast Asian Ambiguous文字のみをNarrowにしたもの。
+BIZ UDゴシック内のEast Asian Ambiguous文字をNarrowにしたもの。
 
 East Asian Ambiguous文字に関して、
 + BIZ UDゴシックで元々半分幅に収まっている文字は、半分領域をそのまま使用。
