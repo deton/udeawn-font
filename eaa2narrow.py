@@ -133,6 +133,138 @@ expect_narrow = [ \
   0x2616, 0x2617, 0x261D, 0x261F, 0x2713, 0x2756, 0x27A1, 0x29BF, 0x2B05, \
   0x2B06, 0x2B07]
 
+
+def arrowlr(f):
+    # NarrowなU+2190(←)をU+21C4(⇄)の下半分のコピーとして作成
+    xmin, ymin, xmax, ymax = f[0x2190].boundingBox()
+    origtipy = [p for p in f[0x2190].foreground[0] if p.x <= xmin][0].y
+    #ymidorig = ymin + int((ymax - ymin) / 2)
+    f.selection.select(0x21C4)
+    f.copy()
+    f.selection.select(0x2190)
+    f.paste()
+    g = f[0x2190]
+    layer = g.layers[g.activeLayer]
+    del layer[0]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    tipy = [p for p in layer[0] if p.x <= xmin][0].y
+    #dy = ymidorig - (ymin + int((ymax - ymin) / 2))  # y=778になる
+    dy = origtipy - tipy  # 元の矢印先端と同じy=779にする
+    layer[0].transform(psMat.translate(0, dy))
+    g.setLayer(layer, g.activeLayer)
+
+    # NarrowなU+2192(→)をU+21C4(⇄)の上半分のコピーとして作成
+    f.selection.select(0x21C4)
+    f.copy()
+    f.selection.select(0x2192)
+    f.paste()
+    g = f[0x2192]
+    layer = g.layers[g.activeLayer]
+    del layer[1]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    tipy = [p for p in layer[0] if p.x >= xmax][0].y
+    dy = origtipy - tipy
+    layer[0].transform(psMat.translate(0, dy))
+    g.setLayer(layer, g.activeLayer)
+
+
+def twoDotLeader(f, halfWidth):
+    if 0x2025 not in f:
+        return
+    g = f[0x2025]  # two dot leader(‥)
+    layer = g.layers[g.activeLayer]
+    c0 = layer[0]
+    xmin0, ymin, xmax, ymax = c0.boundingBox()
+    c1 = layer[1]
+    xmin1, ymin, xmax, ymax = c1.boundingBox()
+    dx = - int((xmin1 - xmin0) / 2)
+    c1.transform(psMat.translate(dx, 0))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def threeDotLeader(f, halfWidth):
+    if 0x2026 not in f:
+        return
+    g = f[0x2026]  # three dot leader(…)
+    layer = g.layers[g.activeLayer]
+    c0 = layer[0]
+    xmin0, ymin, xmax, ymax = c0.boundingBox()
+    c1 = layer[1]
+    xmin1, ymin, xmax, ymax = c1.boundingBox()
+    dx = - int((xmin1 - xmin0) / 2)
+    c1.transform(psMat.translate(dx, 0))
+    c2 = layer[2]
+    c2.transform(psMat.translate(dx * 2, 0))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def whiteStar(f, halfWidth):
+    if 0x2606 not in f:
+        return
+    g = f[0x2606]  # white star(☆)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    scale0 = halfWidth / (xmax - xmin)
+    scalecen0 = psMat.compose(trcen, psMat.compose(psMat.scale(scale0, 1), psMat.inverse(trcen)))
+    layer[0].transform(scalecen0)
+    # 線が細くなりすぎないように、内側の星は外側(の縮小率)よりも縮める
+    scalecen1 = psMat.compose(trcen, psMat.compose(psMat.scale(scale0 * 0.8, 0.8), psMat.inverse(trcen)))
+    layer[1].transform(scalecen1)
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def narrow_withscale(f, halfWidth, scalex, ucoderange):
+    for ucode in ucoderange:
+        if ucode not in f:
+            continue
+        if ucode not in eaw_array:
+            continue
+        g = f[ucode]
+        if not g.isWorthOutputting():
+            continue
+        w = g.width
+        if w <= halfWidth:
+            continue
+        g.transform(psMat.scale(scalex, 1))
+        g.width = halfWidth
+
+
+def greek(f, halfWidth):
+    """Ambiguousなギリシャ文字をNarrowにする"""
+    maxboxw = 1921  # ギリシャ文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
+    # scalex=0.5だと細すぎる印象があるのでなるべく大きくなるようにしたい。
+    # かといって文字ごとにscaleがばらばらだと大きさがそろわず読みにくい。
+    # ただし、0.53 (=1024/1921)なので0.5と違いがわからない程度
+    scalex = halfWidth / maxboxw
+    # Unicode Block: Greek and Coptic
+    narrow_withscale(f, halfWidth, scalex, range(0x0370, 0x0400))
+
+
+def cyrillic(f, halfWidth):
+    """Ambiguousなキリル文字をNarrowにする"""
+    maxboxw = 1855  # キリル文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
+    scalex = halfWidth / maxboxw  # 0.55
+    # Unicode Block: Cyrillic
+    narrow_withscale(f, halfWidth, scalex, range(0x0400, 0x0500))
+
+
+def centerInWidth(g):
+    w = g.width
+    b = int((g.left_side_bearing + g.right_side_bearing) / 2)
+    g.left_side_bearing = b
+    g.right_side_bearing = b
+    g.width = w  # g.widthが縮む場合があるので再設定
+
+
 def main(fontfile, fontfamily, fontstyle, version):
     font = fontforge.open(fontfile)
 
@@ -140,6 +272,13 @@ def main(fontfile, fontfamily, fontstyle, version):
     halfWidth = font[0x0020].width
 
     # East Asian Ambiguousなグリフの幅を半分にする。
+    arrowlr(font)
+    greek(font, halfWidth)
+    cyrillic(font, halfWidth)
+    twoDotLeader(font, halfWidth)
+    threeDotLeader(font, halfWidth)
+    whiteStar(font, halfWidth)
+
     # ただし、元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
     for ucode in eaw_useright:
@@ -168,14 +307,21 @@ def main(fontfile, fontfamily, fontstyle, version):
             continue
         w = g.width
         if w > 0 and w > halfWidth:
-            bbox = g.boundingBox()
-            boxw = bbox[2] - bbox[0]
+            xmin, ymin, xmax, ymax = g.boundingBox()
+            boxw = xmax - xmin
             if boxw > halfWidth:
-                # 文字幅を半分に縮める
-                g.transform(psMat.scale(0.5, 1.0))
-            else:
-                g.transform(psMat.translate(-halfWidth / 2, 0))
+                # 文字幅をNarrowに収まるように縮める
+                # +60: side bearing(余白)を加える(罫線を除く)
+                if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
+                    scalex = halfWidth / boxw
+                else:
+                    scalex = halfWidth / (boxw + 60)
+                g.transform(psMat.scale(scalex, 1))
+            #else:
+                # bboxがNarrowに収まる場合は横にずらして中央に移動
+                #g.transform(psMat.translate(-halfWidth / 2, 0))
             g.width = halfWidth
+            centerInWidth(g)
 
     # 修正後のフォントファイルを保存
     copyright = "###COPYRIGHT###"
