@@ -273,6 +273,29 @@ def divide(f, halfWidth):
     centerInWidth(g)
 
 
+def kome(f, halfWidth):
+    g = f[0x203B]  # reference mark(※)
+    layer = g.layers[g.activeLayer]
+    # 単純化のため、bbox中心を原点に移動してからX縮小・丸の移動後に位置を戻す
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()
+    # X部分の幅を縮める。XXX: 線が細くなって見にくくなる
+    layer[0].transform(psMat.scale(scalex, 1))
+    xmin0s, ymin0, xmax0, ymax0 = layer[0].boundingBox()
+    dx = xmin0s - xmin0
+    layer[1].transform(psMat.translate(dx, 0))  # 左丸を移動
+    layer[3].transform(psMat.translate(-dx, 0))  # 右丸を移動
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def whiteTriangleDU(f, halfWidth):
     # 単に幅を縮めると、斜め線が細くなって見にくいので補正
     g = f[0x25BD]  # white down-pointing triangle(▽)
@@ -399,8 +422,9 @@ def main(fontfile, fontfamily, fontstyle, version):
     whiteStar(font, halfWidth)
     nearlyEqual(font, halfWidth)
     divide(font, halfWidth)
+    kome(font, halfWidth)
     whiteTriangleDU(font, halfWidth)
-    # TODO: ※□ ±◇∴∵➡⬅
+    # TODO: □ ±◇∴∵➡⬅
 
     # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
