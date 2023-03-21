@@ -213,13 +213,13 @@ def whiteStar(f, halfWidth):
     xmin, ymin, xmax, ymax = layer.boundingBox()
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
+    scale0 = halfWidth / (xmax - xmin + SIDE_BEARING)
     trcen = psMat.translate(-cx, -cy)
-    scale0 = halfWidth / (xmax - xmin)
-    scalecen0 = psMat.compose(trcen, psMat.compose(psMat.scale(scale0, 1), psMat.inverse(trcen)))
-    layer[0].transform(scalecen0)
+    layer.transform(trcen)
+    layer[0].transform(psMat.scale(scale0, 1))
     # 線が細くなりすぎないように、内側の星は外側(の縮小率)よりも縮める
-    scalecen1 = psMat.compose(trcen, psMat.compose(psMat.scale(scale0 * 0.8, 0.8), psMat.inverse(trcen)))
-    layer[1].transform(scalecen1)
+    layer[1].transform(psMat.scale(scale0 * 0.8, 0.8))
+    layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -274,6 +274,7 @@ def divide(f, halfWidth):
 
 
 def whiteTriangleDU(f, halfWidth):
+    # 単に幅を縮めると、斜め線が細くなって見にくいので補正
     g = f[0x25BD]  # white down-pointing triangle(▽)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
