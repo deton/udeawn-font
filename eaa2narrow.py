@@ -174,7 +174,7 @@ def twoDotLeader(f, halfWidth):
     c1 = layer[1]
     xmin1, ymin, xmax, ymax = c1.boundingBox()
     # 点の間隔をつめる
-    dx = - int((xmin1 - xmin0) / 2)
+    dx = - round((xmin1 - xmin0) / 2)
     c1.transform(psMat.translate(dx, 0))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
@@ -191,7 +191,7 @@ def threeDotLeader(f, halfWidth):
     c1 = layer[1]
     xmin1, ymin, xmax, ymax = c1.boundingBox()
     # 点の間隔をつめる。XXX: つまりすぎて少し見にくい気も
-    dx = - int((xmin1 - xmin0) / 2)
+    dx = - round((xmin1 - xmin0) / 2)
     c1.transform(psMat.translate(dx, 0))
     c2 = layer[2]
     c2.transform(psMat.translate(dx * 2, 0))
@@ -307,7 +307,7 @@ def cyrillic(f, halfWidth):
 
 def centerInWidth(g):
     w = g.width
-    b = int((g.left_side_bearing + g.right_side_bearing) / 2)
+    b = round((g.left_side_bearing + g.right_side_bearing) / 2)
     g.left_side_bearing = b
     g.right_side_bearing = b
     g.width = w  # g.widthが縮む場合があるので再設定
