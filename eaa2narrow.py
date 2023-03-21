@@ -190,7 +190,7 @@ def threeDotLeader(f, halfWidth):
     xmin0, ymin, xmax, ymax = c0.boundingBox()
     c1 = layer[1]
     xmin1, ymin, xmax, ymax = c1.boundingBox()
-    # 点の間隔をつめる
+    # 点の間隔をつめる。XXX: つまりすぎて少し見にくい気も
     dx = - int((xmin1 - xmin0) / 2)
     c1.transform(psMat.translate(dx, 0))
     c2 = layer[2]
@@ -217,6 +217,54 @@ def whiteStar(f, halfWidth):
     # 線が細くなりすぎないように、内側の星は外側(の縮小率)よりも縮める
     scalecen1 = psMat.compose(trcen, psMat.compose(psMat.scale(scale0 * 0.8, 0.8), psMat.inverse(trcen)))
     layer[1].transform(scalecen1)
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def nearlyEqual(f, halfWidth):
+    # 単に幅を縮めると、丸が縦長になって見にくいので、位置移動だけで変形
+    gref = f[0x003D]  # equal(=)
+    xminref, ymin, xmaxref, ymax = gref.boundingBox()
+    g = f[0x2252]  # nearly equals(≒)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    # =部分の端の点を移動
+    for p in layer[0] + layer[1]:
+        if p.x <= xmin:
+            p.x = xminref
+        elif p.x >= xmax:
+            p.x = xmaxref
+    # 上側の丸
+    c2 = layer[2]
+    xmin2, ymin, xmax2, ymax = c2.boundingBox()
+    offset = (xmin2 - xmin) / 2  # /2 半分に縮小
+    dx = xminref + offset - xmin2
+    c2.transform(psMat.translate(dx, 0))
+    # 下側の丸
+    c3 = layer[3]
+    xmin3, ymin, xmax3, ymax = c3.boundingBox()
+    dx = xmaxref - offset - xmax3
+    c3.transform(psMat.translate(dx, 0))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+
+
+def divide(f, halfWidth):
+    gref = f[0x003D]  # equal(=)
+    xminref, ymin, xmaxref, ymax = gref.boundingBox()
+    wref = xmaxref - xminref
+    g = f[0x00F7]  # divide(÷)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    w = xmax - xmin
+    dx = round((w - wref) / 2)
+    # -部分の端の点を移動
+    for p in layer[0]:
+        if p.x <= xmin:
+            p.x += dx
+        elif p.x >= xmax:
+            p.x -= dx
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -278,6 +326,8 @@ def main(fontfile, fontfamily, fontstyle, version):
     twoDotLeader(font, halfWidth)
     threeDotLeader(font, halfWidth)
     whiteStar(font, halfWidth)
+    nearlyEqual(font, halfWidth)
+    divide(font, halfWidth)
 
     # ただし、元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
