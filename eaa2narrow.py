@@ -139,13 +139,12 @@ def arrowlr(f):
     xmin, ymin, xmax, ymax = f[0x2190].boundingBox()
     origtipy = [p for p in f[0x2190].foreground[0] if p.x <= xmin][0].y
     #ymidorig = ymin + int((ymax - ymin) / 2)
-    f.selection.select(0x21C4)
-    f.copy()
-    f.selection.select(0x2190)
-    f.paste()
+    gsrc = f[0x21C4]
+    layersrc = gsrc.layers[gsrc.activeLayer]
+    c = layersrc[1].dup()
     g = f[0x2190]
     layer = g.layers[g.activeLayer]
-    del layer[0]
+    layer[0] = c
     xmin, ymin, xmax, ymax = layer.boundingBox()
     tipy = [p for p in layer[0] if p.x <= xmin][0].y
     #dy = ymidorig - (ymin + int((ymax - ymin) / 2))  # y=778になる
@@ -154,13 +153,10 @@ def arrowlr(f):
     g.setLayer(layer, g.activeLayer)
 
     # NarrowなU+2192(→)をU+21C4(⇄)の上半分のコピーとして作成
-    f.selection.select(0x21C4)
-    f.copy()
-    f.selection.select(0x2192)
-    f.paste()
+    c = layersrc[0].dup()
     g = f[0x2192]
     layer = g.layers[g.activeLayer]
-    del layer[1]
+    layer[0] = c
     xmin, ymin, xmax, ymax = layer.boundingBox()
     tipy = [p for p in layer[0] if p.x >= xmax][0].y
     dy = origtipy - tipy
@@ -177,6 +173,7 @@ def twoDotLeader(f, halfWidth):
     xmin0, ymin, xmax, ymax = c0.boundingBox()
     c1 = layer[1]
     xmin1, ymin, xmax, ymax = c1.boundingBox()
+    # 点の間隔をつめる
     dx = - int((xmin1 - xmin0) / 2)
     c1.transform(psMat.translate(dx, 0))
     g.setLayer(layer, g.activeLayer)
@@ -193,6 +190,7 @@ def threeDotLeader(f, halfWidth):
     xmin0, ymin, xmax, ymax = c0.boundingBox()
     c1 = layer[1]
     xmin1, ymin, xmax, ymax = c1.boundingBox()
+    # 点の間隔をつめる
     dx = - int((xmin1 - xmin0) / 2)
     c1.transform(psMat.translate(dx, 0))
     c2 = layer[2]
@@ -207,6 +205,8 @@ def whiteStar(f, halfWidth):
         return
     g = f[0x2606]  # white star(☆)
     layer = g.layers[g.activeLayer]
+    # 外側と内側の星で別の縮小率を使うので、ずれを回避するため、
+    # bbox中心を原点に移動してから縮小したのち位置を戻す。(参考:cica.py)
     xmin, ymin, xmax, ymax = layer.boundingBox()
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
