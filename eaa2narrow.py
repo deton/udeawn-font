@@ -328,8 +328,9 @@ def main(fontfile, fontfamily, fontstyle, version):
     whiteStar(font, halfWidth)
     nearlyEqual(font, halfWidth)
     divide(font, halfWidth)
+    # TODO: ※□△▽ ±◇∴∵➡⬅
 
-    # ただし、元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
+    # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
     for ucode in eaw_useright:
         g = font[ucode]
@@ -359,13 +360,12 @@ def main(fontfile, fontfamily, fontstyle, version):
         if w > 0 and w > halfWidth:
             xmin, ymin, xmax, ymax = g.boundingBox()
             boxw = xmax - xmin
-            if boxw > halfWidth:
-                # 文字幅をNarrowに収まるように縮める
-                # +60: side bearing(余白)を加える(罫線を除く)
-                if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
-                    scalex = halfWidth / boxw
-                else:
-                    scalex = halfWidth / (boxw + 60)
+            # 文字幅をNarrowに収まるように縮める
+            if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
+                g.transform(psMat.scale(0.5, 1))
+            elif boxw > halfWidth:
+                # +60: side bearing(余白)を加える
+                scalex = halfWidth / (boxw + 60)
                 g.transform(psMat.scale(scalex, 1))
             #else:
                 # bboxがNarrowに収まる場合は横にずらして中央に移動
