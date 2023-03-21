@@ -3,9 +3,12 @@
 #   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version>
 #   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWH Regular 0.0.1
 import datetime
+import math
 import sys
 import fontforge
 import psMat
+
+SIDE_BEARING = 60  # 幅を縮小後に残しておく、左右side bearing(余白)の合計値
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
@@ -270,6 +273,73 @@ def divide(f, halfWidth):
     centerInWidth(g)
 
 
+def whiteTriangleDU(f, halfWidth):
+    g = f[0x25BD]  # white down-pointing triangle(▽)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    boxw = xmax - xmin
+    scalex = halfWidth / (boxw + SIDE_BEARING)
+
+    # 計算を単純にするため外側三角の下点端が原点に来るように移動
+    tip0 = layer[0][2]
+    transy = psMat.translate(0, -tip0.y)
+    layer.transform(psMat.compose(transy, psMat.translate(-tip0.x, 0)))
+    # 幅を縮める
+    layer.transform(psMat.scale(scalex, 1))
+
+    c0 = layer[0]
+    c1 = layer[1]
+    d = c0[0].y - c1[0].y
+
+    # 平行線の距離(d)と、相似な三角形の辺の比が同じことを使って、
+    # 内側三角の上辺左右端のdxと、下点端のdyを計算する。
+    # 外側contour(c0)は左上の点から時計回り。
+    # 内側contour(c1)は左上の点から反時計回り。
+    # 相似三角形1: c0下点(原点) -- c0右上点 -- c0右上点から垂線を下ろしたx軸上点
+    #              (0, 0) -- (c0[1].x, c0[1].y) -- (c0[1].x, 0)
+    # 相似三角形2: c0下点(原点) -- c1下点+dy -- c1+(dx,dy)線から原点への垂線交点
+    #              (0, 0) -- (0, c11y) -- (c1nx, c1ny)
+    # 原点と相似三角形2の3点目の距離をdにしたい。
+    #     (0, 0) -- (c0[1].x, c0[1].y) : (0, 0) -- (c0[1].x, 0)
+    #   = (0, 0) -- (0, c11y)          : (0, 0) -- (c1nx, c1ny)
+    # →
+    #     sqrt(c0[1].x ** 2 + c0[1].y ** 2) : c0[1].x
+    #   = c11y : d
+    c11y = d * math.sqrt(c0[1].x ** 2 + c0[1].y ** 2) / c0[1].x
+    # 内側三角の右上がりの辺の傾きは外側に合わせて平行にする。
+    #   c0[1].y / c0[1].x = (c1[2].y - c11y) / c12x
+    c12x = c0[1].x * (c1[2].y - c11y) / c0[1].y
+    dy = c11y - c1[1].y
+    dxright = c12x - c1[2].x
+    dxleft = -dxright
+
+    # 内側三角の左上点を右に移動
+    c1[0].x += dxleft
+    # 内側三角の右上点を左に移動
+    c1[2].x += dxright
+    # 内側三角の下点を上に移動
+    c1[1].y += dy
+
+    # y方向位置を戻す。x方向は後でcenterInWidth()で中央に寄せる
+    layer.transform(psMat.inverse(transy))
+
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+    # white up-pointing triangle(△)
+    g = f[0x25B3]
+    layer = g.layers[g.activeLayer]
+    layer.transform(psMat.scale(scalex, 1))
+    c1 = layer[1]
+    c1[0].y -= dy
+    c1[1].x += dxleft
+    c1[2].x += dxright
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def narrow_withscale(f, halfWidth, scalex, ucoderange):
     for ucode in ucoderange:
         if ucode not in f:
@@ -328,7 +398,8 @@ def main(fontfile, fontfamily, fontstyle, version):
     whiteStar(font, halfWidth)
     nearlyEqual(font, halfWidth)
     divide(font, halfWidth)
-    # TODO: ※□△▽ ±◇∴∵➡⬅
+    whiteTriangleDU(font, halfWidth)
+    # TODO: ※□ ±◇∴∵➡⬅
 
     # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
@@ -365,7 +436,7 @@ def main(fontfile, fontfamily, fontstyle, version):
                 g.transform(psMat.scale(0.5, 1))
             elif boxw > halfWidth:
                 # +60: side bearing(余白)を加える
-                scalex = halfWidth / (boxw + 60)
+                scalex = halfWidth / (boxw + SIDE_BEARING)
                 g.transform(psMat.scale(scalex, 1))
             #else:
                 # bboxがNarrowに収まる場合は横にずらして中央に移動
