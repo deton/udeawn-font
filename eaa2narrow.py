@@ -8,7 +8,9 @@ import sys
 import fontforge
 import psMat
 
-SIDE_BEARING = 60  # 幅を縮小後に残しておく、左右side bearing(余白)の合計値
+# 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
+# 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる
+SIDE_BEARING = 120
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
@@ -424,7 +426,7 @@ def main(fontfile, fontfamily, fontstyle, version):
     divide(font, halfWidth)
     kome(font, halfWidth)
     whiteTriangleDU(font, halfWidth)
-    # TODO: □ ±◇∴∵➡⬅
+    # TODO: □⇒⇔ ±◇∴∵➡⬅
 
     # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
@@ -460,7 +462,7 @@ def main(fontfile, fontfamily, fontstyle, version):
             if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
                 g.transform(psMat.scale(0.5, 1))
             elif boxw > halfWidth:
-                # +60: side bearing(余白)を加える
+                # side bearing(余白)を加える
                 scalex = halfWidth / (boxw + SIDE_BEARING)
                 g.transform(psMat.scale(scalex, 1))
             #else:
