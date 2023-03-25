@@ -275,6 +275,54 @@ def divide(f, halfWidth):
     centerInWidth(g)
 
 
+def trimleft(g, halfWidth):
+    """左半分の点を、halfWidthに収まるように右に移動する"""
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    # expect: xmax - (xmin + dx) + SIDE_BEARING <= halfWidth
+    dx = xmax - xmin + SIDE_BEARING - halfWidth
+    # 左半分の点を右に移動
+    for p in layer[0]:
+        if p.x < halfWidth:
+            p.x += dx
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def trimright(g, halfWidth):
+    """右半分の点を、halfWidthに収まるように左に移動する"""
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    # expect: (xmax - dx) - xmin + SIDE_BEARING <= halfWidth
+    dx = xmax - xmin + SIDE_BEARING - halfWidth
+    # 右半分の点を左に移動
+    for p in layer[0]:
+        if p.x > halfWidth:
+            p.x -= dx
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def arrowdblb(f, halfWidth):
+    # FIXME:斜め線の交差等で壊れる
+    gref = f[0x2194]  # arrowboth(↔)
+    xminref, ymin, xmaxref, ymax = gref.boundingBox()
+    g = f[0x21D4]  # arrowdblboth(⇔)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    # expect: xmax - (xmin + dx) == xmaxref - xminref
+    dx = (xmax - xmin) - (xmaxref - xminref)
+    # 左半分の点を右に移動
+    for p in layer[0]:
+        if p.x <= halfWidth:
+            p.x += dx
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def kome(f, halfWidth):
     g = f[0x203B]  # reference mark(※)
     layer = g.layers[g.activeLayer]
@@ -426,7 +474,11 @@ def main(fontfile, fontfamily, fontstyle, version):
     divide(font, halfWidth)
     kome(font, halfWidth)
     whiteTriangleDU(font, halfWidth)
-    # TODO: □⇒⇔ ±◇∴∵➡⬅
+    # arrowdblb(font, halfWidth)
+    # TODO: □ ±◇∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
+    trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
+    #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
+    #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
 
     # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
