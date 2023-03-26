@@ -9,7 +9,7 @@ import fontforge
 import psMat
 
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
-# 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる
+# 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
 SIDE_BEARING = 120
 
 # East Asian Ambiguousのリスト
@@ -306,18 +306,46 @@ def trimright(g, halfWidth):
 
 
 def arrowdblb(f, halfWidth):
-    # FIXME:斜め線の交差等で壊れる
+    # 斜め線が細くなりすぎないように、矢じり間隔を短くした上で、幅を縮める
     gref = f[0x2194]  # arrowboth(↔)
-    xminref, ymin, xmaxref, ymax = gref.boundingBox()
+    layer = gref.layers[gref.activeLayer]
+    xminref, yminref, xmaxref, ymaxref = gref.boundingBox()
+    # 左右の矢じり間隔
+    leftxmax = 0
+    rightxmin = halfWidth
+    for p in layer[0]:
+        if p.y == ymaxref:
+            if p.x < halfWidth / 2:
+                if leftxmax < p.x:
+                    leftxmax = p.x
+            else:
+                if rightxmin > p.x:
+                    rightxmin = p.x
+    diff = rightxmin - leftxmax
+
     g = f[0x21D4]  # arrowdblboth(⇔)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
-    # expect: xmax - (xmin + dx) == xmaxref - xminref
-    dx = (xmax - xmin) - (xmaxref - xminref)
-    # 左半分の点を右に移動
+    leftxmax = 0
+    rightxmin = halfWidth * 2
     for p in layer[0]:
-        if p.x <= halfWidth:
-            p.x += dx
+        if p.x < halfWidth:
+            if leftxmax < p.x:
+                leftxmax = p.x
+        else:
+            if rightxmin > p.x:
+                rightxmin = p.x
+    # expect: rightxmin - (leftxmax + dx) = diff
+    dx = rightxmin - leftxmax - diff
+    # 左半分の点を右に移動
+    for la in layer:
+        for p in la:
+            if p.x <= halfWidth:
+                p.x += dx
+
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    layer.transform(psMat.scale(scalex, 1))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -351,8 +379,7 @@ def whiteTriangleDU(f, halfWidth):
     g = f[0x25BD]  # white down-pointing triangle(▽)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
-    boxw = xmax - xmin
-    scalex = halfWidth / (boxw + SIDE_BEARING)
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
 
     # 計算を単純にするため外側三角の下点端が原点に来るように移動
     tip0 = layer[0][2]
@@ -474,7 +501,7 @@ def main(fontfile, fontfamily, fontstyle, version):
     divide(font, halfWidth)
     kome(font, halfWidth)
     whiteTriangleDU(font, halfWidth)
-    # arrowdblb(font, halfWidth)
+    arrowdblb(font, halfWidth)
     # TODO: □ ±◇∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
