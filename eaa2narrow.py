@@ -227,6 +227,73 @@ def g_whiteStar(f, halfWidth):
     centerInWidth(g)
 
 
+def g_infinity(f, halfWidth):
+    # 左右端の線が細くなって見にくくならないように。
+    # XXX:少し太すぎでバランス悪いかも
+    g = f[0x221E]  # infinity(∞)
+    layer = g.layers[g.activeLayer]
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 外側
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()  # 内側左
+    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()  # 内側右
+    boxw0 = xmax0 - xmin0
+    scale0 = halfWidth / (boxw0 + SIDE_BEARING)
+    # print(scale0)  # Regular: 0.58, Bold: 0.57
+    linewidth = ymax0 - ymax2
+    centerwidth = xmin2 - xmax1
+    cx = (xmin0 + xmax0) / 2
+    cy = (ymin0 + ymax0) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    layer[0].transform(psMat.scale(scale0, 1))
+
+    # 内側
+    boxw2 = xmax2 - xmin2
+    # expect: boxw0 * scale0 = linewidth + boxw1 * scale1 + centerwidth + boxw2 * scale2 + linewidth
+    # 左右同じとして、boxw1 = boxw2, scale1 = scale2
+    #     → boxw0 * scale0 = (boxw2 * scale2) * 2 + linewidth * 2 + centerwidth
+    scale2 = (boxw0 * scale0 - linewidth * 2 - centerwidth) / (boxw2 * 2)
+    # print(scale2)  # Regular: 0.45, Bold: 0.38
+    layer[2].transform(psMat.scale(scale2, 1))
+    layer[1].transform(psMat.scale(scale2, 1))
+    # 中央に寄りすぎなので調整
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()
+    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()
+    # expect: xmax2 + dx + linewidth = xmax0
+    dx = xmax0 - xmax2 - linewidth
+    layer[2].transform(psMat.translate(dx, 1))
+    layer[1].transform(psMat.translate(-dx, 1))
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def g_proportional(f, halfWidth):
+    g = f[0x221D]  # proportional(∝)
+    layer = g.layers[g.activeLayer]
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 外側
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()  # 内側
+    boxw0 = xmax0 - xmin0
+    scale0 = halfWidth / (boxw0 + SIDE_BEARING)
+    linewidth = ymax0 - ymax1
+    cx = (xmin0 + xmax0) / 2
+    cy = (ymin0 + ymax0) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    layer[0].transform(psMat.scale(scale0, 1))
+    layer[1].transform(psMat.scale(scale0 * 0.8, 1))
+    # 中央に寄りすぎなので調整
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()
+    # expect: xmin0 + linewidth = xmin1 - dx
+    dx = xmin1 - xmin0 - linewidth
+    layer[1].transform(psMat.translate(-dx, 1))
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_whiteSquare(f, halfWidth):
     g = f[0x25A1]  # white square(□)
     layer = g.layers[g.activeLayer]
@@ -523,7 +590,9 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_kome(font, halfWidth)
     g_whiteTriangleDU(font, halfWidth)
     g_arrowdblb(font, halfWidth)
-    # TODO: ±∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
+    g_infinity(font, halfWidth)
+    g_proportional(font, halfWidth)
+    # TODO: ±∴∵ ℃(丸が縦長で見にくい)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
     #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
