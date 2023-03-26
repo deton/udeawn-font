@@ -139,7 +139,7 @@ expect_narrow = [ \
   0x2B06, 0x2B07]
 
 
-def arrowlr(f):
+def g_arrowlr(f):
     # NarrowなU+2190(←)をU+21C4(⇄)の下半分のコピーとして作成
     xmin, ymin, xmax, ymax = f[0x2190].boundingBox()
     origtipy = [p for p in f[0x2190].foreground[0] if p.x <= xmin][0].y
@@ -169,7 +169,7 @@ def arrowlr(f):
     g.setLayer(layer, g.activeLayer)
 
 
-def twoDotLeader(f, halfWidth):
+def g_twoDotLeader(f, halfWidth):
     if 0x2025 not in f:
         return
     g = f[0x2025]  # two dot leader(‥)
@@ -186,7 +186,7 @@ def twoDotLeader(f, halfWidth):
     centerInWidth(g)
 
 
-def threeDotLeader(f, halfWidth):
+def g_threeDotLeader(f, halfWidth):
     if 0x2026 not in f:
         return
     g = f[0x2026]  # three dot leader(…)
@@ -205,7 +205,7 @@ def threeDotLeader(f, halfWidth):
     centerInWidth(g)
 
 
-def whiteStar(f, halfWidth):
+def g_whiteStar(f, halfWidth):
     if 0x2606 not in f:
         return
     g = f[0x2606]  # white star(☆)
@@ -227,7 +227,7 @@ def whiteStar(f, halfWidth):
     centerInWidth(g)
 
 
-def whiteSquare(f, halfWidth):
+def g_whiteSquare(f, halfWidth):
     g = f[0x25A1]  # white square(□)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
@@ -247,7 +247,7 @@ def whiteSquare(f, halfWidth):
     centerInWidth(g)
 
 
-def nearlyEqual(f, halfWidth):
+def g_nearlyEqual(f, halfWidth):
     # 単に幅を縮めると、丸が縦長になって見にくいので、位置移動だけで変形
     gref = f[0x003D]  # equal(=)
     xminref, ymin, xmaxref, ymax = gref.boundingBox()
@@ -275,7 +275,7 @@ def nearlyEqual(f, halfWidth):
     g.width = halfWidth
 
 
-def divide(f, halfWidth):
+def g_divide(f, halfWidth):
     gref = f[0x003D]  # equal(=)
     xminref, ymin, xmaxref, ymax = gref.boundingBox()
     wref = xmaxref - xminref
@@ -325,7 +325,7 @@ def trimright(g, halfWidth):
     centerInWidth(g)
 
 
-def arrowdblb(f, halfWidth):
+def g_arrowdblb(f, halfWidth):
     # 斜め線が細くなりすぎないように、矢じり間隔を短くした上で、幅を縮める
     gref = f[0x2194]  # arrowboth(↔)
     layer = gref.layers[gref.activeLayer]
@@ -371,7 +371,7 @@ def arrowdblb(f, halfWidth):
     centerInWidth(g)
 
 
-def kome(f, halfWidth):
+def g_kome(f, halfWidth):
     g = f[0x203B]  # reference mark(※)
     layer = g.layers[g.activeLayer]
     # 単純化のため、bbox中心を原点に移動してからX縮小・丸の移動後に位置を戻す
@@ -394,7 +394,7 @@ def kome(f, halfWidth):
     centerInWidth(g)
 
 
-def whiteTriangleDU(f, halfWidth):
+def g_whiteTriangleDU(f, halfWidth):
     # 単に幅を縮めると、斜め線が細くなって見にくいので補正
     g = f[0x25BD]  # white down-pointing triangle(▽)
     layer = g.layers[g.activeLayer]
@@ -477,7 +477,7 @@ def narrow_withscale(f, halfWidth, scalex, ucoderange):
         g.width = halfWidth
 
 
-def greek(f, halfWidth):
+def g_greek(f, halfWidth):
     """Ambiguousなギリシャ文字をNarrowにする"""
     maxboxw = 1921  # ギリシャ文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
     # scalex=0.5だと細すぎる印象があるのでなるべく大きくなるようにしたい。
@@ -488,7 +488,7 @@ def greek(f, halfWidth):
     narrow_withscale(f, halfWidth, scalex, range(0x0370, 0x0400))
 
 
-def cyrillic(f, halfWidth):
+def g_cyrillic(f, halfWidth):
     """Ambiguousなキリル文字をNarrowにする"""
     maxboxw = 1855  # キリル文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
     scalex = halfWidth / maxboxw  # 0.55
@@ -511,18 +511,18 @@ def main(fontfile, fontfamily, fontstyle, version):
     halfWidth = font[0x0020].width
 
     # East Asian Ambiguousなグリフの幅を半分にする。
-    arrowlr(font)
-    greek(font, halfWidth)
-    cyrillic(font, halfWidth)
-    twoDotLeader(font, halfWidth)
-    threeDotLeader(font, halfWidth)
-    whiteStar(font, halfWidth)
-    whiteSquare(font, halfWidth)
-    nearlyEqual(font, halfWidth)
-    divide(font, halfWidth)
-    kome(font, halfWidth)
-    whiteTriangleDU(font, halfWidth)
-    arrowdblb(font, halfWidth)
+    g_arrowlr(font)
+    g_greek(font, halfWidth)
+    g_cyrillic(font, halfWidth)
+    g_twoDotLeader(font, halfWidth)
+    g_threeDotLeader(font, halfWidth)
+    g_whiteStar(font, halfWidth)
+    g_whiteSquare(font, halfWidth)
+    g_nearlyEqual(font, halfWidth)
+    g_divide(font, halfWidth)
+    g_kome(font, halfWidth)
+    g_whiteTriangleDU(font, halfWidth)
+    g_arrowdblb(font, halfWidth)
     # TODO: ±∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
