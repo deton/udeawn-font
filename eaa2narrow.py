@@ -227,6 +227,26 @@ def whiteStar(f, halfWidth):
     centerInWidth(g)
 
 
+def whiteSquare(f, halfWidth):
+    g = f[0x25A1]  # white square(□)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    layer.transform(psMat.scale(scalex, 1))
+    # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
+    c0 = layer[0]  # 外側四角
+    c1 = layer[1]  # 内側四角
+    linewidth = c0[0].y - c1[0].y
+    for p in c1:
+        if p.x < halfWidth / 2:
+            p.x = c0[0].x + linewidth
+        else:
+            p.x = c0[1].x - linewidth
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def nearlyEqual(f, halfWidth):
     # 単に幅を縮めると、丸が縦長になって見にくいので、位置移動だけで変形
     gref = f[0x003D]  # equal(=)
@@ -497,12 +517,13 @@ def main(fontfile, fontfamily, fontstyle, version):
     twoDotLeader(font, halfWidth)
     threeDotLeader(font, halfWidth)
     whiteStar(font, halfWidth)
+    whiteSquare(font, halfWidth)
     nearlyEqual(font, halfWidth)
     divide(font, halfWidth)
     kome(font, halfWidth)
     whiteTriangleDU(font, halfWidth)
     arrowdblb(font, halfWidth)
-    # TODO: □ ±◇∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
+    # TODO: ±∴∵ ℃(丸が縦長で見にくい)∞(端が細くなって見にくい)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
     #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
