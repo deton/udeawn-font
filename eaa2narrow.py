@@ -268,6 +268,32 @@ def g_infinity(f, halfWidth):
     centerInWidth(g)
 
 
+def g_degreeCelsius(f, halfWidth):
+    # 丸が縦長すぎて見にくくならないように
+    g = f[0x2103]  # degree celsius(℃)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    # 丸の内側を外側よりも縮めて線が細くなりすぎないようにする
+    cin = layer[1].dup()
+    xmin1, ymin1, xmax1, ymax1 = cin.boundingBox()
+    cx = (xmin1 + xmax1) / 2
+    cy = (ymin1 + ymax1) / 2
+    cin.transform(psMat.translate(-cx, -cy))
+    cin.transform(psMat.scale(scalex * 0.8, 0.8))
+
+    layer.transform(psMat.scale(scalex, 1))
+    # 丸の内側を、外側の位置に移動して、置き換え
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()
+    cx = (xmin0 + xmax0) / 2
+    cy = (ymin0 + ymax0) / 2
+    cin.transform(psMat.translate(cx, cy))
+    layer[1] = cin
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_proportional(f, halfWidth):
     g = f[0x221D]  # proportional(∝)
     layer = g.layers[g.activeLayer]
@@ -592,7 +618,8 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_arrowdblb(font, halfWidth)
     g_infinity(font, halfWidth)
     g_proportional(font, halfWidth)
-    # TODO: ±∴∵ ℃(丸が縦長で見にくい)
+    g_degreeCelsius(font, halfWidth)
+    # TODO: ±∴∵
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
     #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
