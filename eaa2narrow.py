@@ -579,6 +579,23 @@ def g_whiteTriangleDU(f, halfWidth):
     centerInWidth(g)
 
 
+def maxboxwidth(f, ucoderange):
+    maxboxw = 0
+    for ucode in ucoderange:
+        if ucode not in f:
+            continue
+        if ucode not in eaw_array:
+            continue
+        g = f[ucode]
+        if not g.isWorthOutputting():
+            continue
+        xmin, ymin, xmax, ymax = g.boundingBox()
+        boxw = xmax - xmin
+        if maxboxw < boxw:
+            maxboxw = boxw
+    return maxboxw
+
+
 def narrow_withscale(f, halfWidth, scalex, ucoderange):
     for ucode in ucoderange:
         if ucode not in f:
@@ -588,16 +605,17 @@ def narrow_withscale(f, halfWidth, scalex, ucoderange):
         g = f[ucode]
         if not g.isWorthOutputting():
             continue
-        w = g.width
-        if w <= halfWidth:
-            continue
+        #w = g.width
+        #if w <= halfWidth:
+        #    continue
         g.transform(psMat.scale(scalex, 1))
         g.width = halfWidth
 
 
 def g_greek(f, halfWidth):
     """Ambiguousなギリシャ文字をNarrowにする"""
-    maxboxw = 1921  # ギリシャ文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
+    # ギリシャ文字群のbboxの最大幅
+    maxboxw = maxboxwidth(f, range(0x0370, 0x0400))
     # scalex=0.5だと細すぎる印象があるのでなるべく大きくなるようにしたい。
     # かといって文字ごとにscaleがばらばらだと大きさがそろわず読みにくい。
     # ただし、0.53 (=1024/1921)なので0.5と違いがわからない程度
@@ -608,7 +626,8 @@ def g_greek(f, halfWidth):
 
 def g_cyrillic(f, halfWidth):
     """Ambiguousなキリル文字をNarrowにする"""
-    maxboxw = 1855  # キリル文字群のbboxの最大幅。TODO:bbox.peでの調査不要に
+    # キリル文字群のbboxの最大幅
+    maxboxw = maxboxwidth(f, range(0x0400, 0x0500))
     scalex = halfWidth / maxboxw  # 0.55
     # Unicode Block: Cyrillic
     narrow_withscale(f, halfWidth, scalex, range(0x0400, 0x0500))
