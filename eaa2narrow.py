@@ -10,7 +10,7 @@ import psMat
 
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
 # 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
-SIDE_BEARING = 120
+SIDE_BEARING = 90
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
@@ -320,6 +320,31 @@ def g_proportional(f, halfWidth):
     centerInWidth(g)
 
 
+def g_circle(g, halfWidth):
+    # 左右端の線が細くなって見にくくならないように。
+    layer = g.layers[g.activeLayer]
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 外側
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()  # 内側
+    boxw0 = xmax0 - xmin0
+    scale0 = halfWidth / (boxw0 + SIDE_BEARING)
+    linewidth = ymax0 - ymax1
+    cx = (xmin0 + xmax0) / 2
+    cy = (ymin0 + ymax0) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    layer[0].transform(psMat.scale(scale0, 1))
+
+    # 内側
+    boxw1 = xmax1 - xmin1
+    # expect: boxw0 * scale0 = linewidth + boxw1 * scale1 + linewidth
+    scale1 = (boxw0 * scale0 - linewidth * 2) / boxw1
+    layer[1].transform(psMat.scale(scale1, 1))
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_whiteSquare(f, halfWidth):
     g = f[0x25A1]  # white square(□)
     layer = g.layers[g.activeLayer]
@@ -604,7 +629,7 @@ def main(fontfile, fontfamily, fontstyle, version):
     halfWidth = font[0x0020].width
 
     # East Asian Ambiguousなグリフの幅を半分にする。
-    g_arrowlr(font)
+    #g_arrowlr(font)
     g_greek(font, halfWidth)
     g_cyrillic(font, halfWidth)
     g_twoDotLeader(font, halfWidth)
@@ -619,7 +644,11 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_infinity(font, halfWidth)
     g_proportional(font, halfWidth)
     g_degreeCelsius(font, halfWidth)
+    g_circle(font[0x25CB], halfWidth)  # circle(○) XXX:Oに似てくる
+    g_circle(font[0x25EF], halfWidth)  # large circle(◯)
     # TODO: ±∴∵
+    trimright(font[0x2190], halfWidth)  # arrowleft(←)
+    trimleft(font[0x2192], halfWidth)  # arrowright(→)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
     #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
