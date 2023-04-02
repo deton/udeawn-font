@@ -10,7 +10,8 @@ import psMat
 
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
 # 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
-SIDE_BEARING = 90
+# XXX:大きくしても(512)、U+2161(Ⅱ)が縮められる場合あり
+SIDE_BEARING = 30
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
@@ -345,6 +346,27 @@ def g_circle(g, halfWidth):
     centerInWidth(g)
 
 
+def g_romanNumeralTwo(f, halfWidth):
+    g = f[0x2161]  # roman numeral two(Ⅱ)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    layer.transform(psMat.scale(scalex, 1))
+    # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
+    c0 = layer[0]  # 外側
+    c1 = layer[1]  # 内側四角
+    xmin1, ymin1, xmax1, ymax1 = c1.boundingBox()
+    linewidth = c0[0].y - c1[0].y
+    for p in c1:
+        if p.x <= xmin1:
+            p.x = c0[-2].x + linewidth
+        else:
+            p.x = c0[3].x - linewidth
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_whiteSquare(f, halfWidth):
     g = f[0x25A1]  # white square(□)
     layer = g.layers[g.activeLayer]
@@ -665,6 +687,7 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_degreeCelsius(font, halfWidth)
     g_circle(font[0x25CB], halfWidth)  # circle(○) XXX:Oに似てくる
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
+    g_romanNumeralTwo(font, halfWidth)
     # TODO: ±∴∵
     trimright(font[0x2190], halfWidth)  # arrowleft(←)
     trimleft(font[0x2192], halfWidth)  # arrowright(→)
