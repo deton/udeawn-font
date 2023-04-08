@@ -333,13 +333,13 @@ def g_circle(g, halfWidth):
     cy = (ymin0 + ymax0) / 2
     trcen = psMat.translate(-cx, -cy)
     layer.transform(trcen)
-    layer[0].transform(psMat.scale(scale0, 1))
+    layer[0].transform(psMat.scale(scale0, scale0))
 
     # 内側
     boxw1 = xmax1 - xmin1
     # expect: boxw0 * scale0 = linewidth + boxw1 * scale1 + linewidth
     scale1 = (boxw0 * scale0 - linewidth * 2) / boxw1
-    layer[1].transform(psMat.scale(scale1, 1))
+    layer[1].transform(psMat.scale(scale1, scale1))
     layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
@@ -362,6 +362,37 @@ def g_romanNumeralTwo(f, halfWidth):
             p.x = c0[-2].x + linewidth
         else:
             p.x = c0[3].x - linewidth
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def g_romanNumeralThree(f, halfWidth):
+    g = f[0x2162]  # roman numeral three(Ⅲ)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    layer.transform(psMat.scale(scalex, 1))
+    # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
+    c0 = layer[0]  # 外側
+    c1 = layer[1]  # 内側四角左
+    xmin1, ymin1, xmax1, ymax1 = c1.boundingBox()
+    linewidth = c0[0].y - c1[0].y
+    dx = 0
+    for p in c1:
+        if p.x <= xmin1:
+            x = c0[-2].x + linewidth
+            dx = x - p.x
+            p.x += dx
+        else:
+            p.x -= dx / 2
+    c2 = layer[2]  # 内側四角右
+    xmin2, ymin2, xmax2, ymax2 = c2.boundingBox()
+    for p in c2:
+        if p.x >= xmax2:
+            p.x -= dx
+        else:
+            p.x += dx / 2
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -465,6 +496,25 @@ def trimright(g, halfWidth):
     centerInWidth(g)
 
 
+def trimboth(g, halfWidth, side_bearing):
+    """xmin,xmaxの点を、halfWidthに収まるように右左に移動する"""
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    # expect: (xmax - dx) - (xmin + dx) + side_bearing <= halfWidth
+    dx = (xmax - xmin + side_bearing - halfWidth) / 2
+    for c in layer:
+        for p in c:
+            if p.x <= xmin + side_bearing:
+                p.x += dx
+            # XXX: ±の+のxmaxが1単位だけ-のxmaxより小さいのでside_bearing幅まで
+            elif p.x >= xmax - side_bearing:
+                p.x -= dx
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+    return dx
+
+
 def g_arrowdblb(f, halfWidth):
     # 斜め線が細くなりすぎないように、矢じり間隔を短くした上で、幅を縮める
     gref = f[0x2194]  # arrowboth(↔)
@@ -498,8 +548,8 @@ def g_arrowdblb(f, halfWidth):
     # expect: rightxmin - (leftxmax + dx) = diff
     dx = rightxmin - leftxmax - diff
     # 左半分の点を右に移動
-    for la in layer:
-        for p in la:
+    for c in layer:
+        for p in c:
             if p.x <= halfWidth:
                 p.x += dx
 
@@ -655,6 +705,32 @@ def g_cyrillic(f, halfWidth):
     narrow_withscale(f, halfWidth, scalex, range(0x0400, 0x0500))
 
 
+def g_boxDrawing(f, halfWidth):
+    """罫線素片を縦線が細くならないようにNarrowにする"""
+    for u in [0x2502, 0x2503]:
+        g = f[u]
+        g.width = halfWidth
+        centerInWidth(g)
+    for u in range(0x252C, 0x254C):
+        if u in f:
+            dx = trimboth(f[u], halfWidth, 0)
+    narrowCenter = halfWidth / 2
+    for u in range(0x250C, 0x252C):
+        if u not in f:
+            continue
+        g = f[u]
+        layer = g.layers[g.activeLayer]
+        for c in layer:
+            for p in c:
+                if p.x <= 0:
+                    p.x += dx
+                elif p.x >= halfWidth * 2:
+                    p.x -= dx
+        g.setLayer(layer, g.activeLayer)
+        g.transform(psMat.translate(-narrowCenter, 0))
+        g.width = halfWidth
+
+
 def centerInWidth(g):
     w = g.width
     b = round((g.left_side_bearing + g.right_side_bearing) / 2)
@@ -685,10 +761,13 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_infinity(font, halfWidth)
     g_proportional(font, halfWidth)
     g_degreeCelsius(font, halfWidth)
-    g_circle(font[0x25CB], halfWidth)  # circle(○) XXX:Oに似てくる
+    g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
     g_romanNumeralTwo(font, halfWidth)
-    # TODO: ±∴∵
+    g_romanNumeralThree(font, halfWidth)
+    g_boxDrawing(font, halfWidth)
+    # TODO: ∴∵
+    trimboth(font[0x00B1], halfWidth, SIDE_BEARING)  # plusminus(±)
     trimright(font[0x2190], halfWidth)  # arrowleft(←)
     trimleft(font[0x2192], halfWidth)  # arrowright(→)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
