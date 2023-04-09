@@ -16,9 +16,13 @@ FONTS_DIRECTORIES="${BASE_DIR}/source/"
 
 SRC_FONT_BIZUD_REGULAR='fontforge_export_BIZUDGothic-Regular.ttf'
 SRC_FONT_BIZUD_BOLD='fontforge_export_BIZUDGothic-Bold.ttf'
+SRC_FONT_NOTOEMOJI_REGULAR='NotoEmoji-Regular.ttf'
+SRC_FONT_NOTOEMOJI_BOLD='NotoEmoji-Bold.ttf'
 
 PATH_BIZUD_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_REGULAR"`
 PATH_BIZUD_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_BOLD"`
+PATH_NOTOEMOJI_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_NOTOEMOJI_REGULAR"`
+PATH_NOTOEMOJI_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_NOTOEMOJI_BOLD"`
 
 MODIFIED_FONT_BIZUD_REGULAR='modified_bizud_regular.ttf'
 MODIFIED_FONT_BIZUD_BOLD='modified_bizud_bold.ttf'
@@ -29,10 +33,10 @@ then
   exit 1
 fi
 
-fontforge -script eaa2narrow.py "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION" "$PATH_NOTOEMOJI_REGULAR"
 mv "${FAMILYNAME}-Regular.ttf" "${WORK_DIR}"
 
-fontforge -script eaa2narrow.py "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION" "$PATH_NOTOEMOJI_BOLD"
 mv "${FAMILYNAME}-Bold.ttf" "${WORK_DIR}"
 
 #for f in `ls "${WORK_DIR}/${FAMILYNAME}"*.ttf`
