@@ -17,7 +17,7 @@ fi
 if [ ! -d source/NotoEmoji ]
 then
   curl -L https://fonts.google.com/download?family=Noto%20Emoji -o source/NotoEmoji.zip
-  unzip -d source/NotoEmoji NotoEmoji.zip
+  unzip -d source/NotoEmoji/ source/NotoEmoji.zip
 fi
 
 "${BASE_DIR}/generator-h.sh" "$VERSION" "$FAMILYNAME"
