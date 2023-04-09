@@ -10,7 +10,7 @@ import psMat
 
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
 # 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
-# XXX:大きくしても(512)、U+2161(Ⅱ)が縮められる場合あり
+# XXX:大きくしても(512)、ローマ数字(U+2161 Ⅱ等)は上記設定で縮められる模様
 SIDE_BEARING = 30
 
 # East Asian Ambiguousのリスト
@@ -584,6 +584,46 @@ def g_kome(f, halfWidth):
     centerInWidth(g)
 
 
+def g_therefore(f, halfWidth):
+    # 丸の移動だけで幅を縮める。丸が縦長になると少し見にくいので
+    g = f[0x2234]  # therefore(∴)
+    layer = g.layers[g.activeLayer]
+    # 単純化のため、bbox中心を原点に移動してから丸の移動後に位置を戻す
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    dx = xmax - xmax * scalex
+    layer[1].transform(psMat.translate(dx, 0))  # 左丸を移動
+    layer[2].transform(psMat.translate(-dx, 0))  # 右丸を移動
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def g_because(f, halfWidth):
+    g = f[0x2235]  # because(∵)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    dx = xmax - xmax * scalex
+    layer[1].transform(psMat.translate(dx, 0))  # 左丸を移動
+    layer[2].transform(psMat.translate(-dx, 0))  # 右丸を移動
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_whiteTriangleDU(f, halfWidth):
     # 単に幅を縮めると、斜め線が細くなって見にくいので補正
     g = f[0x25BD]  # white down-pointing triangle(▽)
@@ -756,6 +796,8 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_nearlyEqual(font, halfWidth)
     g_divide(font, halfWidth)
     g_kome(font, halfWidth)
+    g_therefore(font, halfWidth)
+    g_because(font, halfWidth)
     g_whiteTriangleDU(font, halfWidth)
     g_arrowdblb(font, halfWidth)
     g_infinity(font, halfWidth)
@@ -766,11 +808,15 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
-    # TODO: ∴∵
     trimboth(font[0x00B1], halfWidth, SIDE_BEARING)  # plusminus(±)
+    trimboth(font[0x22A5], halfWidth, SIDE_BEARING)  # perpendicular(⊥)
     trimright(font[0x2190], halfWidth)  # arrowleft(←)
     trimleft(font[0x2192], halfWidth)  # arrowright(→)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
+    trimleft(font[0x2203], halfWidth)  # existential(∃)
+    #trimright(font[0x2208], halfWidth)  # element(∈) 曲がり部分に段差ができる
+    #trimleft(font[0x220B], halfWidth)  # suchthat(∋) 曲がり部分に段差ができる
+    trimright(font[0x221F], halfWidth)  # orthogonal(∟)
     #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
     #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
 
