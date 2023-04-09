@@ -350,6 +350,7 @@ def g_romanNumeralTwo(f, halfWidth):
     g = f[0x2161]  # roman numeral two(Ⅱ)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()  # 内側四角
     scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
     layer.transform(psMat.scale(scalex, 1))
     # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
@@ -359,9 +360,24 @@ def g_romanNumeralTwo(f, halfWidth):
     linewidth = c0[0].y - c1[0].y
     for p in c1:
         if p.x <= xmin1:
-            p.x = c0[-2].x + linewidth
+            c1xmin = c0[-2].x + linewidth
+            p.x = c1xmin
         else:
-            p.x = c0[3].x - linewidth
+            c1xmax = c0[3].x - linewidth
+            p.x = c1xmax
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+    g = f[0x2171]  # small roman numeral two(ⅱ)
+    # 線が細くなりすぎないように、移動だけで幅を縮める
+    layer = g.layers[g.activeLayer]
+    dx = c1xmin - xmin1
+    layer[0].transform(psMat.translate(dx, 0))
+    layer[1].transform(psMat.translate(dx, 0))
+    dx = c1xmax - xmax1
+    layer[2].transform(psMat.translate(dx, 0))
+    layer[3].transform(psMat.translate(dx, 0))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -371,6 +387,8 @@ def g_romanNumeralThree(f, halfWidth):
     g = f[0x2162]  # roman numeral three(Ⅲ)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
+    xminb1, yminb1, xmaxb1, ymaxb1 = layer[1].boundingBox()  # 内側四角左
+    xminb2, yminb2, xmaxb2, ymaxb2 = layer[2].boundingBox()  # 内側四角右
     scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
     layer.transform(psMat.scale(scalex, 1))
     # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
@@ -381,18 +399,36 @@ def g_romanNumeralThree(f, halfWidth):
     dx = 0
     for p in c1:
         if p.x <= xmin1:
-            x = c0[-2].x + linewidth
-            dx = x - p.x
+            c1xmin = c0[-2].x + linewidth
+            dx = c1xmin - p.x
             p.x += dx
         else:
             p.x -= dx / 2
+            c1xmax = p.x
     c2 = layer[2]  # 内側四角右
     xmin2, ymin2, xmax2, ymax2 = c2.boundingBox()
     for p in c2:
         if p.x >= xmax2:
             p.x -= dx
+            c2xmax = p.x
         else:
             p.x += dx / 2
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+    g = f[0x2172]  # small roman numeral three(ⅲ)
+    # 線が細くなりすぎないように、移動だけで幅を縮める
+    layer = g.layers[g.activeLayer]
+    dx = c1xmin - xminb1
+    layer[0].transform(psMat.translate(dx, 0))
+    layer[1].transform(psMat.translate(dx, 0))
+    dx = c1xmax - xmaxb1
+    layer[2].transform(psMat.translate(dx, 0))
+    layer[3].transform(psMat.translate(dx, 0))
+    dx = c2xmax - xmaxb2
+    layer[4].transform(psMat.translate(dx, 0))
+    layer[5].transform(psMat.translate(dx, 0))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
