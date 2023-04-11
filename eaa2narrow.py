@@ -187,6 +187,28 @@ def add_evs(f):
 
 def add_emoji(f, halfWidth, emojifontfile):
     """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
+    def narrow(g):
+        xmin, ymin, xmax, ymax = g.boundingBox()
+        boxw = xmax - xmin
+        if boxw <= halfWidth:
+            g.width = halfWidth
+            centerInWidth(g)
+            return
+        scalex = halfWidth / (boxw + SIDE_BEARING)
+        boxh = ymax - ymin
+        if boxh > halfWidth * 2:
+            scaley = halfWidth * 2 / (boxh + SIDE_BEARING)
+        else:
+            scaley = 1
+        cx = (xmin + xmax) / 2
+        cy = (ymin + ymax) / 2
+        trcen = psMat.translate(-cx, -cy)
+        g.transform(trcen)
+        g.transform(psMat.scale(scalex, scaley))
+        g.transform(psMat.inverse(trcen))
+        g.width = halfWidth
+        centerInWidth(g)
+
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
@@ -194,16 +216,11 @@ def add_emoji(f, halfWidth, emojifontfile):
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
         g = emojifont[ucode]
-        xmin, ymin, xmax, ymax = g.boundingBox()
-        scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
-        boxh = ymax - ymin
-        if boxh + SIDE_BEARING > halfWidth * 2:
-            scaley = halfWidth * 2 / (boxh + SIDE_BEARING)
+        if ucode in (0x25fb, 0x25fc):
+            # white medium square(◻), black medium square(◼)
+            scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         else:
-            scaley = 1
-        g.transform(psMat.scale(scalex, scaley))
-        g.width = halfWidth
-        centerInWidth(g)
+            narrow(g)
         emojifont.selection.select(ucode)
         emojifont.copy()
         f.selection.select(ucode)
@@ -933,6 +950,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     scalexy(font[0x25CE], halfWidth)  # bullseye(◎)
     scalexy(font[0x25CF], halfWidth)  # black circle(●)
     scalexy(font[0x25A0], halfWidth)  # black squre(■)
+    scalexy(font[0x29BF], halfWidth)  # circled bullet(⦿)
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
