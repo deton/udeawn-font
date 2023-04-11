@@ -172,6 +172,19 @@ emojis = (
     0x1f6f3)
 
 
+def add_evs(f):
+    """
+    Emoji Variation Selectorを空グリフで追加する。
+    四角入りXが重なって表示されないように。
+    """
+    f.selection.select(0x0020)  # space
+    f.copy()
+    f.selection.select(0xfe0e)  # variation selector-15
+    f.paste()
+    f.selection.select(0xfe0f)  # variation selector-16
+    f.paste()
+
+
 def add_emoji(f, halfWidth, emojifontfile):
     """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
     if not emojifontfile:
@@ -183,7 +196,11 @@ def add_emoji(f, halfWidth, emojifontfile):
         g = emojifont[ucode]
         xmin, ymin, xmax, ymax = g.boundingBox()
         scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
-        scaley = halfWidth * 2 / (ymax - ymin + SIDE_BEARING)
+        boxh = ymax - ymin
+        if boxh + SIDE_BEARING > halfWidth * 2:
+            scaley = halfWidth * 2 / (boxh + SIDE_BEARING)
+        else:
+            scaley = 1
         g.transform(psMat.scale(scalex, scaley))
         g.width = halfWidth
         centerInWidth(g)
@@ -875,6 +892,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     # 半角スペースから幅を取得
     halfWidth = font[0x0020].width
 
+    add_evs(font)
     add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
