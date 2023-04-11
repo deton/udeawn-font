@@ -417,6 +417,20 @@ def g_circle(g, halfWidth):
     centerInWidth(g)
 
 
+def scalexy(g, halfWidth):
+    """縦方向も横方向と同様に縮める"""
+    xmin, ymin, xmax, ymax = g.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    g.transform(trcen)  # 中心を原点に移動。でないと高さ位置が低くなる
+    g.transform(psMat.scale(scalex, scalex))
+    g.transform(psMat.inverse(trcen))
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_romanNumeralTwo(f, halfWidth):
     g = f[0x2161]  # roman numeral two(Ⅱ)
     layer = g.layers[g.activeLayer]
@@ -902,7 +916,6 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_twoDotLeader(font, halfWidth)
     g_threeDotLeader(font, halfWidth)
     g_whiteStar(font, halfWidth)
-    g_whiteSquare(font, halfWidth)
     g_nearlyEqual(font, halfWidth)
     g_divide(font, halfWidth)
     g_kome(font, halfWidth)
@@ -915,6 +928,11 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_degreeCelsius(font, halfWidth)
     g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
+    #g_whiteSquare(font, halfWidth)
+    g_circle(font[0x25A1], halfWidth)  # white squre(□)
+    scalexy(font[0x25CE], halfWidth)  # bullseye(◎)
+    scalexy(font[0x25CF], halfWidth)  # black circle(●)
+    scalexy(font[0x25A0], halfWidth)  # black squre(■)
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
