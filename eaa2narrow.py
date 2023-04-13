@@ -187,40 +187,30 @@ def add_evs(f):
 
 def add_emoji(f, halfWidth, emojifontfile):
     """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
-    def narrow(g):
+    def narrow(g, ydiff):
+        g.transform(psMat.translate(0, ydiff))
         xmin, ymin, xmax, ymax = g.boundingBox()
         boxw = xmax - xmin
-        if boxw <= halfWidth:
-            g.width = halfWidth
-            centerInWidth(g)
-            return
-        scalex = halfWidth / (boxw + SIDE_BEARING)
-        boxh = ymax - ymin
-        if boxh > halfWidth * 2:
-            scaley = halfWidth * 2 / (boxh + SIDE_BEARING)
-        else:
-            scaley = 1
-        cx = (xmin + xmax) / 2
-        cy = (ymin + ymax) / 2
-        trcen = psMat.translate(-cx, -cy)
-        g.transform(trcen)
-        g.transform(psMat.scale(scalex, scaley))
-        g.transform(psMat.inverse(trcen))
+        if boxw > halfWidth:
+            scalex = halfWidth / (boxw + SIDE_BEARING)
+            g.transform(psMat.scale(scalex, 1))
         g.width = halfWidth
         centerInWidth(g)
 
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
+    ydiff = f.ascent - emojifont.ascent - 86  # XXX:元から上にはみ出してる?
     for ucode in emojis:
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
         g = emojifont[ucode]
-        if ucode in (0x25fb, 0x25fc):
-            # white medium square(◻), black medium square(◼)
+        if ucode in (0x25fb, 0x25fc, 0x2611, 0x2716):
+            # white medium square(◻), black medium square(◼),
+            # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         else:
-            narrow(g)
+            narrow(g, ydiff)
         emojifont.selection.select(ucode)
         emojifont.copy()
         f.selection.select(ucode)
