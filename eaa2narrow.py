@@ -200,7 +200,13 @@ def add_emoji(f, halfWidth, emojifontfile):
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
-    ydiff = f.ascent - emojifont.ascent - 86  # XXX:元から上にはみ出してる?
+    # XXX:元から上に32はみ出している。上下同じ程度はみ出るように上下位置を調整
+    g = emojifont[0x26d3]  # chains(⛓)
+    xmin, ymin, xmax, ymax = g.boundingBox()  # _, -340, _, 1740
+    boxh = ymax - ymin  # 2080
+    overflow = (boxh - emojifont.em) / 2  # (2080 - 2048) / 2 = 16
+    # f.ascent:1802,descent:246.  emojifont.ascent:1638,descent:410
+    ydiff = f.ascent + overflow - ymax  # ymax位置をf.ascent+overflowに配置
     for ucode in emojis:
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
