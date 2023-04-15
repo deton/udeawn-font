@@ -16,8 +16,8 @@ jobs:
 
       - name: Build
         run: |
-          ./make.sh
           ./make-h.sh
+          ./make.sh
 
       - name: Make directories for upload-artifact
         run: |

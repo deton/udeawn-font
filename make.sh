@@ -5,7 +5,7 @@ BASE_DIR=$(cd $(dirname $0); pwd)
 WORK_DIR="$BASE_DIR/build_tmp"
 BUILD_DIR="$BASE_DIR/build"
 
-VERSION='0.0.6'
+VERSION='0.0.7'
 
 FAMILYNAME="UDEAWN"
 DISP_FAMILYNAME="UDEAWN"

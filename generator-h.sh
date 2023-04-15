@@ -29,16 +29,16 @@ then
   exit 1
 fi
 
-fontforge -script eaa2narrow.pe "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_REGULAR" "$FAMILYNAME" Regular "$VERSION"
 mv "${FAMILYNAME}-Regular.ttf" "${WORK_DIR}"
 
-fontforge -script eaa2narrow.pe "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION"
+fontforge -script eaa2narrow.py "$PATH_BIZUD_BOLD" "$FAMILYNAME" Bold "$VERSION"
 mv "${FAMILYNAME}-Bold.ttf" "${WORK_DIR}"
 
-for f in `ls "${WORK_DIR}/${FAMILYNAME}"*.ttf`
-do
-  python3 -m ttfautohint -l 6 -r 45 -a nnn -D latn -f none -S -W -X "13-" -I "$f" "${f}_hinted"
-done
+#for f in `ls "${WORK_DIR}/${FAMILYNAME}"*.ttf`
+#do
+#  python3 -m ttfautohint -l 6 -r 45 -a nnn -D latn -f none -S -W -X "13-" -I "$f" "${f}_hinted"
+#done
 
-mv "${WORK_DIR}/${FAMILYNAME}-Regular.ttf_hinted" "${WORK_DIR}/${MODIFIED_FONT_BIZUD_REGULAR}"
-mv "${WORK_DIR}/${FAMILYNAME}-Bold.ttf_hinted" "${WORK_DIR}/${MODIFIED_FONT_BIZUD_BOLD}"
+#mv "${WORK_DIR}/${FAMILYNAME}-Regular.ttf_hinted" "${WORK_DIR}/${MODIFIED_FONT_BIZUD_REGULAR}"
+#mv "${WORK_DIR}/${FAMILYNAME}-Bold.ttf_hinted" "${WORK_DIR}/${MODIFIED_FONT_BIZUD_BOLD}"

@@ -36,27 +36,20 @@ FONTS_DIRECTORIES="${BASE_DIR}/source/"
 
 SRC_FONT_ILLU_REGULAR='Illusion-Regular.ttc'
 SRC_FONT_ILLU_BOLD='Illusion-Bold.ttc'
-SRC_FONT_BIZUD_REGULAR='fontforge_export_BIZUDGothic-Regular.ttf'
-SRC_FONT_BIZUD_BOLD='fontforge_export_BIZUDGothic-Bold.ttf'
+#SRC_FONT_BIZUD_REGULAR='fontforge_export_BIZUDGothic-Regular.ttf'
+#SRC_FONT_BIZUD_BOLD='fontforge_export_BIZUDGothic-Bold.ttf'
 
 PATH_ILLU_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_ILLU_REGULAR"`
 PATH_ILLU_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_ILLU_BOLD"`
-PATH_BIZUD_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_REGULAR"`
-PATH_BIZUD_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_BOLD"`
+#PATH_BIZUD_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_REGULAR"`
+#PATH_BIZUD_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_BOLD"`
+PATH_BIZUD_REGULAR='build/UDEAWH-Regular.ttf'
+PATH_BIZUD_BOLD='build/UDEAWH-Bold.ttf'
 
 MODIFIED_FONT_ILLU_REGULAR='modified_illu_regular.sfd'
 MODIFIED_FONT_ILLU_BOLD='modified_illu_bold.sfd'
 MODIFIED_FONT_BIZUD_REGULAR='modified_bizud_regular.ttf'
 MODIFIED_FONT_BIZUD_BOLD='modified_bizud_bold.ttf'
-
-if [ -z "$SRC_FONT_ILLU_REGULAR" -o \
--z "$SRC_FONT_ILLU_BOLD" -o \
--z "$SRC_FONT_BIZUD_REGULAR" -o \
--z "$SRC_FONT_BIZUD_BOLD" ]
-then
-  echo 'ソースフォントファイルが存在しない'
-  exit 1
-fi
 
 GEN_SCRIPT_ILLU='gen_script_illu.pe'
 
