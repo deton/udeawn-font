@@ -185,18 +185,20 @@ def add_evs(f):
     f.paste()
 
 
+def narrow(g, halfWidth):
+    """文字幅をNarrowに収まるように縮める"""
+    xmin, ymin, xmax, ymax = g.boundingBox()
+    boxw = xmax - xmin
+    if boxw > halfWidth:
+        # side bearing(余白)を加える
+        scalex = halfWidth / (boxw + SIDE_BEARING)
+        g.transform(psMat.scale(scalex, 1))
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def add_emoji(f, halfWidth, emojifontfile):
     """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
-    def narrow(g, ydiff):
-        g.transform(psMat.translate(0, ydiff))
-        xmin, ymin, xmax, ymax = g.boundingBox()
-        boxw = xmax - xmin
-        if boxw > halfWidth:
-            scalex = halfWidth / (boxw + SIDE_BEARING)
-            g.transform(psMat.scale(scalex, 1))
-        g.width = halfWidth
-        centerInWidth(g)
-
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
@@ -216,7 +218,8 @@ def add_emoji(f, halfWidth, emojifontfile):
             # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         else:
-            narrow(g, ydiff)
+            g.transform(psMat.translate(0, ydiff))
+            narrow(g, halfWidth)
         emojifont.selection.select(ucode)
         emojifont.copy()
         f.selection.select(ucode)
@@ -353,9 +356,8 @@ def g_infinity(f, halfWidth):
     centerInWidth(g)
 
 
-def g_degreeCelsius(f, halfWidth):
+def g_degreeCelsius(g, halfWidth):
     # 丸が縦長すぎて見にくくならないように
-    g = f[0x2103]  # degree celsius(℃)
     layer = g.layers[g.activeLayer]
     xmin, ymin, xmax, ymax = layer.boundingBox()
     scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
@@ -377,6 +379,10 @@ def g_degreeCelsius(f, halfWidth):
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
+
+
+def g_angstrom(f, halfWidth):
+    g_degreeCelsius(f[0x212B], halfWidth)  # angstrom sign(Å)
 
 
 def g_proportional(f, halfWidth):
@@ -406,7 +412,7 @@ def g_proportional(f, halfWidth):
 
 
 def g_circle(g, halfWidth):
-    # 左右端の線が細くなって見にくくならないように。
+    # 線が細くなって見にくくならないように。
     layer = g.layers[g.activeLayer]
     xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 外側
     xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()  # 内側
@@ -423,6 +429,38 @@ def g_circle(g, halfWidth):
     boxw1 = xmax1 - xmin1
     # expect: boxw0 * scale0 = linewidth + boxw1 * scale1 + linewidth
     scale1 = (boxw0 * scale0 - linewidth * 2) / boxw1
+    layer[1].transform(psMat.scale(scale1, scale1))
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def g_bullseye(f, halfWidth):
+    g = f[0x25CE]  # bullseye(◎)
+    # 線が細くなって見にくくならないように。XXX:太すぎるかも?
+    layer = g.layers[g.activeLayer]
+    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()  # 外側のwhite circle
+    xmin3, ymin3, xmax3, ymax3 = layer[3].boundingBox()
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 内側のwhite circle
+    xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()
+    boxw2 = xmax2 - xmin2
+    scale2 = halfWidth / (boxw2 + SIDE_BEARING)
+    linewidth = ymax2 - ymax3
+    cx = (xmin2 + xmax2) / 2
+    cy = (ymin2 + ymax2) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    layer[2].transform(psMat.scale(scale2, scale2))
+
+    boxw3 = xmax3 - xmin3
+    # expect: boxw2 * scale2 = linewidth + boxw3 * scale3 + linewidth
+    scale3 = (boxw2 * scale2 - linewidth * 2) / boxw3
+    layer[3].transform(psMat.scale(scale3, scale3))
+    layer[0].transform(psMat.scale(scale2, scale2))
+    boxw0 = xmax0 - xmin0
+    boxw1 = xmax1 - xmin1
+    scale1 = (boxw0 * scale2 - linewidth * 2) / boxw1
     layer[1].transform(psMat.scale(scale1, scale1))
     layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
@@ -695,6 +733,42 @@ def g_arrowdblb(f, halfWidth):
     centerInWidth(g)
 
 
+def g_blackarrowlr(f, halfWidth):
+    # 幅を縮めた後に矢柄を短くして、矢じりを大きくして見やすくする
+    # (単にtrimleft()すると矢柄がほとんど無くなる)
+    g = f[0x27A1]  # black rightwards arrow(➡)
+    narrow(g, halfWidth)
+    layer = g.layers[g.activeLayer]
+    c = layer[0]
+    # 左上部分の水平線と垂直線が同じ長さになるように、点c[-1]のxを小さくする
+    ah = c[0].y - c[-1].y
+    # expect: c[-1].x - c[-2].x = ah
+    c[-1].x = c[-2].x + ah
+    c[0].x = c[-1].x
+    # 左下部分
+    c[-4].x = c[-3].x + ah
+    c[-5].x = c[-4].x
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+    g = f[0x2B05]  # leftwards black arrow(⬅)
+    narrow(g, halfWidth)
+    layer = g.layers[g.activeLayer]
+    c = layer[0]
+    # 右上部分の水平線と垂直線が同じ長さになるように、点c[-1]のxを小さくする
+    ah = c[0].y - c[1].y
+    # expect: c[2].x - c[1].x = ah
+    c[1].x = c[2].x - ah
+    c[0].x = c[1].x
+    # 右下部分
+    c[4].x = c[3].x - ah
+    c[5].x = c[4].x
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_kome(f, halfWidth):
     g = f[0x203B]  # reference mark(※)
     layer = g.layers[g.activeLayer]
@@ -938,12 +1012,13 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_arrowdblb(font, halfWidth)
     g_infinity(font, halfWidth)
     g_proportional(font, halfWidth)
-    g_degreeCelsius(font, halfWidth)
+    g_degreeCelsius(font[0x2103], halfWidth)  # degree celsius(℃)
+    g_angstrom(font, halfWidth)
     g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
     #g_whiteSquare(font, halfWidth)
     g_circle(font[0x25A1], halfWidth)  # white squre(□)
-    scalexy(font[0x25CE], halfWidth)  # bullseye(◎)
+    g_bullseye(font, halfWidth)
     scalexy(font[0x25CF], halfWidth)  # black circle(●)
     scalexy(font[0x25A0], halfWidth)  # black squre(■)
     scalexy(font[0x29BF], halfWidth)  # circled bullet(⦿)
@@ -959,8 +1034,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     #trimright(font[0x2208], halfWidth)  # element(∈) 曲がり部分に段差ができる
     #trimleft(font[0x220B], halfWidth)  # suchthat(∋) 曲がり部分に段差ができる
     trimright(font[0x221F], halfWidth)  # orthogonal(∟)
-    #trimleft(font[0x27A1], halfWidth)  # black rightwards arrow(➡) FIXME:矢柄がほとんど無くなる
-    #trimright(font[0x2B05], halfWidth)  # leftwards black arrow(⬅)
+    g_blackarrowlr(font, halfWidth)
 
     # 元々半分幅な文字は縮めると細すぎるので縮めずそのまま使う。
     # 右半分だけにする
@@ -988,22 +1062,12 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
         g = font[ucode]
         if not g.isWorthOutputting():
             continue
-        w = g.width
-        if w > 0 and w > halfWidth:
-            xmin, ymin, xmax, ymax = g.boundingBox()
-            boxw = xmax - xmin
-            # 文字幅をNarrowに収まるように縮める
-            if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
-                g.transform(psMat.scale(0.5, 1))
-            elif boxw > halfWidth:
-                # side bearing(余白)を加える
-                scalex = halfWidth / (boxw + SIDE_BEARING)
-                g.transform(psMat.scale(scalex, 1))
-            #else:
-                # bboxがNarrowに収まる場合は横にずらして中央に移動
-                #g.transform(psMat.translate(-halfWidth / 2, 0))
+        if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
+            g.transform(psMat.scale(0.5, 1))
             g.width = halfWidth
-            centerInWidth(g)
+            continue
+        if g.width > halfWidth:
+            narrow(g, halfWidth)
 
     # 修正後のフォントファイルを保存
     copyright = "###COPYRIGHT###"
