@@ -13,6 +13,9 @@ Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/
 [Illusion]
 Copyright 2019 Tomohiro Matsushima (https://github.com/tomonic-x/Illusion)
 
+[Noto Emoji]
+Copyright 2013, 2022 Google Inc. (https://github.com/googlefonts/noto-emoji)
+
 [UDEV Gothic]
 Copyright (c) 2022, Yuko Otawara
 

@@ -1,7 +1,7 @@
 #!/usr/bin/fontforge
 # East Asian Ambiguousなグリフの幅を半分に縮める
-#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version>
-#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWH Regular 0.0.1
+#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf]
+#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWH Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
 import datetime
 import math
 import sys
@@ -138,6 +138,90 @@ expect_narrow = [ \
   0x23CB, 0x23CC, 0x23CE, 0x2423, 0x24EA, 0x2600, 0x2601, 0x2602, 0x2603, \
   0x2616, 0x2617, 0x261D, 0x261F, 0x2713, 0x2756, 0x27A1, 0x29BF, 0x2B05, \
   0x2B06, 0x2B07]
+
+# Narrowにしてマージする絵文字リスト。
+# EastAsianWidth.txtで;Wや;FでないのにNotoEmojiではWideになっている文字
+emojis = (
+    0x203c, 0x2049, 0x20e3, 0x2122, 0x2139, 0x2194, 0x2195, 0x2196, 0x2197,
+    0x2198, 0x2199, 0x21a9, 0x21aa, 0x2328, 0x23cf, 0x23ed, 0x23ee, 0x23ef,
+    0x23f1, 0x23f2, 0x23f8, 0x23f9, 0x23fa, 0x24c2, 0x25aa, 0x25ab, 0x25b6,
+    0x25c0, 0x25fb, 0x25fc, 0x2600, 0x2601, 0x2602, 0x2603, 0x2604, 0x260e,
+    0x2611, 0x2618, 0x261d, 0x2620, 0x2622, 0x2623, 0x2626, 0x262a, 0x262e,
+    0x262f, 0x2638, 0x2639, 0x263a, 0x2640, 0x2642, 0x265f, 0x2660, 0x2663,
+    0x2665, 0x2666, 0x2668, 0x267b, 0x267e, 0x2692, 0x2694, 0x2695, 0x2696,
+    0x2697, 0x2699, 0x269b, 0x269c, 0x26a0, 0x26a7, 0x26b0, 0x26b1, 0x26c8,
+    0x26cf, 0x26d1, 0x26d3, 0x26e9, 0x26f0, 0x26f1, 0x26f4, 0x26f7, 0x26f8,
+    0x26f9, 0x2702, 0x2708, 0x2709, 0x270c, 0x270d, 0x270f, 0x2712, 0x2714,
+    0x2716, 0x271d, 0x2721, 0x2733, 0x2734, 0x2744, 0x2747, 0x2763, 0x2764,
+    0x27a1, 0x2934, 0x2935, 0x2b05, 0x2b06, 0x2b07,
+    0x1f170, 0x1f171, 0x1f17e, 0x1f17f, 0x1f1e6, 0x1f1e7, 0x1f1e8, 0x1f1e9,
+    0x1f1ea, 0x1f1eb, 0x1f1ec, 0x1f1ed, 0x1f1ee, 0x1f1ef, 0x1f1f0, 0x1f1f1,
+    0x1f1f2, 0x1f1f3, 0x1f1f4, 0x1f1f5, 0x1f1f6, 0x1f1f7, 0x1f1f8, 0x1f1f9,
+    0x1f1fa, 0x1f1fb, 0x1f1fc, 0x1f1fd, 0x1f1fe, 0x1f1ff, 0x1f321, 0x1f324,
+    0x1f325, 0x1f326, 0x1f327, 0x1f328, 0x1f329, 0x1f32a, 0x1f32b, 0x1f32c,
+    0x1f336, 0x1f37d, 0x1f396, 0x1f397, 0x1f399, 0x1f39a, 0x1f39b, 0x1f39e,
+    0x1f39f, 0x1f3cb, 0x1f3cc, 0x1f3cd, 0x1f3ce, 0x1f3d4, 0x1f3d5, 0x1f3d6,
+    0x1f3d7, 0x1f3d8, 0x1f3d9, 0x1f3da, 0x1f3db, 0x1f3dc, 0x1f3dd, 0x1f3de,
+    0x1f3df, 0x1f3f3, 0x1f3f5, 0x1f3f7, 0x1f43f, 0x1f441, 0x1f4fd, 0x1f549,
+    0x1f54a, 0x1f56f, 0x1f570, 0x1f573, 0x1f574, 0x1f575, 0x1f576, 0x1f577,
+    0x1f578, 0x1f579, 0x1f587, 0x1f58a, 0x1f58b, 0x1f58c, 0x1f58d, 0x1f590,
+    0x1f5a5, 0x1f5a8, 0x1f5b1, 0x1f5b2, 0x1f5bc, 0x1f5c2, 0x1f5c3, 0x1f5c4,
+    0x1f5d1, 0x1f5d2, 0x1f5d3, 0x1f5dc, 0x1f5dd, 0x1f5de, 0x1f5e1, 0x1f5e3,
+    0x1f5e8, 0x1f5ef, 0x1f5f3, 0x1f5fa, 0x1f6cb, 0x1f6cd, 0x1f6ce, 0x1f6cf,
+    0x1f6e0, 0x1f6e1, 0x1f6e2, 0x1f6e3, 0x1f6e4, 0x1f6e5, 0x1f6e9, 0x1f6f0,
+    0x1f6f3)
+
+
+def add_evs(f):
+    """
+    Emoji Variation Selectorを空グリフで追加する。
+    四角入りXが重なって表示されないように。
+    """
+    f.selection.select(0x0020)  # space
+    f.copy()
+    f.selection.select(0xfe0e)  # variation selector-15
+    f.paste()
+    f.selection.select(0xfe0f)  # variation selector-16
+    f.paste()
+
+
+def add_emoji(f, halfWidth, emojifontfile):
+    """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
+    def narrow(g, ydiff):
+        g.transform(psMat.translate(0, ydiff))
+        xmin, ymin, xmax, ymax = g.boundingBox()
+        boxw = xmax - xmin
+        if boxw > halfWidth:
+            scalex = halfWidth / (boxw + SIDE_BEARING)
+            g.transform(psMat.scale(scalex, 1))
+        g.width = halfWidth
+        centerInWidth(g)
+
+    if not emojifontfile:
+        return
+    emojifont = fontforge.open(emojifontfile)
+    # XXX:元から上に32はみ出している。上下同じ程度はみ出るように上下位置を調整
+    g = emojifont[0x26d3]  # chains(⛓)
+    xmin, ymin, xmax, ymax = g.boundingBox()  # _, -340, _, 1740
+    boxh = ymax - ymin  # 2080
+    overflow = (boxh - emojifont.em) / 2  # (2080 - 2048) / 2 = 16
+    # f.ascent:1802,descent:246.  emojifont.ascent:1638,descent:410
+    ydiff = f.ascent + overflow - ymax  # ymax位置をf.ascent+overflowに配置
+    for ucode in emojis:
+        if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
+            continue
+        g = emojifont[ucode]
+        if ucode in (0x25fb, 0x25fc, 0x2611, 0x2716):
+            # white medium square(◻), black medium square(◼),
+            # ballot box with check(☑), heavy multiplication x(✖)
+            scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
+        else:
+            narrow(g, ydiff)
+        emojifont.selection.select(ucode)
+        emojifont.copy()
+        f.selection.select(ucode)
+        f.paste()
+    emojifont.close()
 
 
 def g_arrowlr(f):
@@ -342,6 +426,20 @@ def g_circle(g, halfWidth):
     layer[1].transform(psMat.scale(scale1, scale1))
     layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def scalexy(g, halfWidth):
+    """縦方向も横方向と同様に縮める"""
+    xmin, ymin, xmax, ymax = g.boundingBox()
+    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    g.transform(trcen)  # 中心を原点に移動。でないと高さ位置が低くなる
+    g.transform(psMat.scale(scalex, scalex))
+    g.transform(psMat.inverse(trcen))
     g.width = halfWidth
     centerInWidth(g)
 
@@ -815,11 +913,14 @@ def centerInWidth(g):
     g.width = w  # g.widthが縮む場合があるので再設定
 
 
-def main(fontfile, fontfamily, fontstyle, version):
+def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     font = fontforge.open(fontfile)
 
     # 半角スペースから幅を取得
     halfWidth = font[0x0020].width
+
+    add_evs(font)
+    add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
     #g_arrowlr(font)
@@ -828,7 +929,6 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_twoDotLeader(font, halfWidth)
     g_threeDotLeader(font, halfWidth)
     g_whiteStar(font, halfWidth)
-    g_whiteSquare(font, halfWidth)
     g_nearlyEqual(font, halfWidth)
     g_divide(font, halfWidth)
     g_kome(font, halfWidth)
@@ -841,6 +941,12 @@ def main(fontfile, fontfamily, fontstyle, version):
     g_degreeCelsius(font, halfWidth)
     g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
+    #g_whiteSquare(font, halfWidth)
+    g_circle(font[0x25A1], halfWidth)  # white squre(□)
+    scalexy(font[0x25CE], halfWidth)  # bullseye(◎)
+    scalexy(font[0x25CF], halfWidth)  # black circle(●)
+    scalexy(font[0x25A0], halfWidth)  # black squre(■)
+    scalexy(font[0x29BF], halfWidth)  # circled bullet(⦿)
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
@@ -926,5 +1032,9 @@ def main(fontfile, fontfamily, fontstyle, version):
 
 
 if __name__ == '__main__':
-    # fontfile, fontfamily, fontstyle, version
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    # fontfile, fontfamily, fontstyle, version, emojifontfile
+    if len(sys.argv) > 5:
+        emojifontfile = sys.argv[5]
+    else:
+        emojifontfile = None
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile)

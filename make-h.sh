@@ -14,6 +14,12 @@ then
   mkdir "$BUILD_DIR"
 fi
 
+if [ ! -d source/NotoEmoji ]
+then
+  curl -L https://fonts.google.com/download?family=Noto%20Emoji -o source/NotoEmoji.zip
+  unzip -d source/NotoEmoji/ source/NotoEmoji.zip
+fi
+
 "${BASE_DIR}/generator-h.sh" "$VERSION" "$FAMILYNAME"
 "${BASE_DIR}/os2_patch.sh" "$FAMILYNAME" "" 0
 "${BASE_DIR}/copyright-h.sh" "$FAMILYNAME"
