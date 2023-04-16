@@ -172,17 +172,17 @@ emojis = (
     0x1f6f3)
 
 
-def add_evs(f):
+def add_variationSelector(f):
     """
-    Emoji Variation Selectorを空グリフで追加する。
-    四角入りXが重なって表示されないように。
+    Variation Selectorに空グリフを追加する。
+    wslttyで四角入りXが重なって表示されないように。
     """
     f.selection.select(0x0020)  # space
     f.copy()
-    f.selection.select(0xfe0e)  # variation selector-15
-    f.paste()
-    f.selection.select(0xfe0f)  # variation selector-16
-    f.paste()
+    # emoji用(0xFE0E,0xFE0F)と、doc/ivs.txt で使われているもの
+    for ucode in (*range(0xFE00, 0xFE10), *range(0xE0100, 0xE0105)):
+        f.selection.select(ucode)
+        f.paste()
 
 
 def narrow(g, halfWidth):
@@ -976,7 +976,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     # 半角スペースから幅を取得
     halfWidth = font[0x0020].width
 
-    add_evs(font)
+    add_variationSelector(font)
     add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
