@@ -227,36 +227,6 @@ def add_emoji(f, halfWidth, emojifontfile):
     emojifont.close()
 
 
-def g_arrowlr(f):
-    # NarrowなU+2190(←)をU+21C4(⇄)の下半分のコピーとして作成
-    xmin, ymin, xmax, ymax = f[0x2190].boundingBox()
-    origtipy = [p for p in f[0x2190].foreground[0] if p.x <= xmin][0].y
-    #ymidorig = ymin + int((ymax - ymin) / 2)
-    gsrc = f[0x21C4]
-    layersrc = gsrc.layers[gsrc.activeLayer]
-    c = layersrc[1].dup()
-    g = f[0x2190]
-    layer = g.layers[g.activeLayer]
-    layer[0] = c
-    xmin, ymin, xmax, ymax = layer.boundingBox()
-    tipy = [p for p in layer[0] if p.x <= xmin][0].y
-    #dy = ymidorig - (ymin + int((ymax - ymin) / 2))  # y=778になる
-    dy = origtipy - tipy  # 元の矢印先端と同じy=779にする
-    layer[0].transform(psMat.translate(0, dy))
-    g.setLayer(layer, g.activeLayer)
-
-    # NarrowなU+2192(→)をU+21C4(⇄)の上半分のコピーとして作成
-    c = layersrc[0].dup()
-    g = f[0x2192]
-    layer = g.layers[g.activeLayer]
-    layer[0] = c
-    xmin, ymin, xmax, ymax = layer.boundingBox()
-    tipy = [p for p in layer[0] if p.x >= xmax][0].y
-    dy = origtipy - tipy
-    layer[0].transform(psMat.translate(0, dy))
-    g.setLayer(layer, g.activeLayer)
-
-
 def g_twoDotLeader(f, halfWidth):
     if 0x2025 not in f:
         return
@@ -598,26 +568,6 @@ def g_romanNumeralThree(f, halfWidth):
     dx = c2xmax - xmaxb2
     layer[4].transform(psMat.translate(dx, 0))
     layer[5].transform(psMat.translate(dx, 0))
-    g.setLayer(layer, g.activeLayer)
-    g.width = halfWidth
-    centerInWidth(g)
-
-
-def g_whiteSquare(f, halfWidth):
-    g = f[0x25A1]  # white square(□)
-    layer = g.layers[g.activeLayer]
-    xmin, ymin, xmax, ymax = layer.boundingBox()
-    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
-    layer.transform(psMat.scale(scalex, 1))
-    # 線が細くなりすぎないように、内側の四角の各点のx座標を調整する
-    c0 = layer[0]  # 外側四角
-    c1 = layer[1]  # 内側四角
-    linewidth = c0[0].y - c1[0].y
-    for p in c1:
-        if p.x < halfWidth / 2:
-            p.x = c0[0].x + linewidth
-        else:
-            p.x = c0[1].x - linewidth
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
@@ -1030,7 +980,6 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
-    #g_arrowlr(font)
     g_greek(font, halfWidth)
     g_cyrillic(font, halfWidth)
     g_twoDotLeader(font, halfWidth)
@@ -1049,7 +998,6 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_angstrom(font, halfWidth)
     g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
-    #g_whiteSquare(font, halfWidth)
     g_circle(font[0x25A1], halfWidth)  # white squre(□)
     g_bullseye(font, halfWidth)
     g_circledBullet(font, halfWidth)
