@@ -1042,8 +1042,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
         g = font[ucode]
         if not g.isWorthOutputting():
             continue
-        w = g.width
-        if w > 0 and w > halfWidth:
+        if g.width > halfWidth:
             g.transform(psMat.translate(-halfWidth, 0))
             g.width = halfWidth
 
@@ -1052,8 +1051,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
         g = font[ucode]
         if not g.isWorthOutputting():
             continue
-        w = g.width
-        if w > 0 and w > halfWidth:
+        if g.width > halfWidth:
             g.width = halfWidth
 
     for ucode in eaw_array + expect_narrow:
@@ -1062,12 +1060,13 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
         g = font[ucode]
         if not g.isWorthOutputting():
             continue
+        if g.width <= halfWidth:
+            continue
         if 0x2500 <= ucode <= 0x259F:  # Box Drawing, Block Elements
             g.transform(psMat.scale(0.5, 1))
             g.width = halfWidth
             continue
-        if g.width > halfWidth:
-            narrow(g, halfWidth)
+        narrow(g, halfWidth)
 
     # 修正後のフォントファイルを保存
     copyright = "###COPYRIGHT###"
