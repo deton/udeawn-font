@@ -440,9 +440,9 @@ def g_bullseye(f, halfWidth):
     g = f[0x25CE]  # bullseye(◎)
     # 線が細くなって見にくくならないように。XXX:太すぎるかも?
     layer = g.layers[g.activeLayer]
-    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()  # 外側のwhite circle
+    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()  # 外側の輪
     xmin3, ymin3, xmax3, ymax3 = layer[3].boundingBox()
-    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 内側のwhite circle
+    xmin0, ymin0, xmax0, ymax0 = layer[0].boundingBox()  # 内側の輪
     xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()
     boxw2 = xmax2 - xmin2
     scale2 = halfWidth / (boxw2 + SIDE_BEARING)
@@ -462,6 +462,39 @@ def g_bullseye(f, halfWidth):
     boxw1 = xmax1 - xmin1
     scale1 = (boxw0 * scale2 - linewidth * 2) / boxw1
     layer[1].transform(psMat.scale(scale1, scale1))
+    layer.transform(psMat.inverse(trcen))
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
+def g_circledBullet(f, halfWidth):
+    # もとからnarrowなfisheyeと同じ文字幅、線幅になるように縮める
+    gref = f[0x25C9]  # fisheye(◉)
+    layerref = gref.layers[gref.activeLayer]
+    xminref1, yminref1, xmaxref1, ymaxref1 = layerref[1].boundingBox()  # 外側
+    xminref2, yminref2, xmaxref2, ymaxref2 = layerref[2].boundingBox()  # 内側
+    boxwref = xmaxref1 - xminref1
+    linewidth = ymaxref1 - ymaxref2
+
+    g = f[0x29BF]  # circled bullet(⦿)
+    layer = g.layers[g.activeLayer]
+    xmin, ymin, xmax, ymax = layer.boundingBox()
+    boxw = xmax - xmin
+    scale = boxwref / boxw
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    trcen = psMat.translate(-cx, -cy)
+    layer.transform(trcen)
+    layer[0].transform(psMat.scale(scale, scale))  # 最内の黒円
+    layer[1].transform(psMat.scale(scale, scale))  # 最外円
+
+    # 線の幅が合うようなscaleを算出して縮める
+    xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()
+    boxw2 = xmax2 - xmin2
+    # expect: boxw * scale = linewidth + boxw2 * scale2 + linewidth
+    scale2 = (boxw * scale - linewidth * 2) / boxw2
+    layer[2].transform(psMat.scale(scale2, scale2))
     layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
@@ -1019,9 +1052,9 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     #g_whiteSquare(font, halfWidth)
     g_circle(font[0x25A1], halfWidth)  # white squre(□)
     g_bullseye(font, halfWidth)
+    g_circledBullet(font, halfWidth)
     scalexy(font[0x25CF], halfWidth)  # black circle(●)
     scalexy(font[0x25A0], halfWidth)  # black squre(■)
-    scalexy(font[0x29BF], halfWidth)  # circled bullet(⦿)
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
