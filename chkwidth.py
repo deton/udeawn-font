@@ -294,12 +294,13 @@ eawwf_range = (
 
 def main(fontfile):
     font = fontforge.open(fontfile)
-    if 0x0020 in font:
-        # 半角スペースから幅を取得
-        halfWidth = font[0x0020].width
-    else:
-        # U+3299(㊙)からWide幅を取得。emoji fontには0x0020が無いので
+    if 0x3299 in font:
+        # U+3299(㊙)からWide幅を取得。emoji font向け。
+        # (NotoEmojiの場合は0x0020がWide幅)
         halfWidth = font[0x3299].width / 2
+    else:
+        # 半角スペースから幅を取得。
+        halfWidth = font[0x0020].width
 
     idx = 0
     for ucode in range(0x0020, eawwf_range[-1][1] + 1):
@@ -320,7 +321,7 @@ def main(fontfile):
             continue
         w = g.width
         if w > halfWidth and not iswf:
-            print(f"{ucode:x} {chr(ucode)} {w} {iswf}")
+            print(f"0x{ucode:x} {chr(ucode)} {w}")
     font.close()
 
 if __name__ == '__main__':
