@@ -2,11 +2,15 @@
 
 wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等をNarrowにしたフォントです。
 
-また、UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)でNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小。
-(端末エミュレータ側が想定する幅と合わなくて、文字が重なって読みにくいので)
+端末エミュレータ側が想定する幅と合わないと、テキストブラウザLynxなどで、文字が重なって読みにくいので、
+UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)にある幅になるべく合わせています。
+
+* EastAsianWidth.txtでNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小しています。
+* EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[NotoEmojiにある文字](WidthMismatchNotoEmoji.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
+  (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
 
 ## UDEAWN font
-BIZ UDゴシック内のEast Asian Ambiguous文字をNarrowにしたもの。
+BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
 
 East Asian Ambiguous文字に関して、
 + BIZ UDゴシックで元々半分幅に収まっている文字は、半分領域をそのまま使用。
@@ -18,15 +22,19 @@ East Asian Ambiguous文字に関して、
 East Asian Ambiguous文字のリストは以下を参考に使用。
 https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 
-![udeawn](https://user-images.githubusercontent.com/761487/222949949-fe8dfa6d-582a-4276-8d3c-bbaf7fa08059.png)
+![udeawn](https://user-images.githubusercontent.com/761487/232278123-8aa5a254-5bc9-4d3b-9304-225521dfcf37.png)
+(wslttyでの表示例。UDEAWNフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
 ## UDEAWH font
 BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
 (ただし、元々半分幅に収まっている文字は、縮めずに半分領域をそのまま使用。)
 
-単に縮めているので、縦線が細めです。丸数字等が縦長です。
+一部文字はなるべく縦線が細くならないように幅を縮めていますが、
+それ以外の文字は単に縮めているので、縦線が細めです。
+丸数字等が縦長です。
 
-![udeawh](https://user-images.githubusercontent.com/761487/221395252-e00bd075-fe9c-44e5-a1bc-ec54006f756c.png)
+![udeawh](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
+(wslttyでの表示例。UDEAWHフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
 ## ビルド環境
 
