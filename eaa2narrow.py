@@ -183,6 +183,7 @@ def add_variationSelector(f):
     for ucode in (*range(0xFE00, 0xFE10), *range(0xE0100, 0xE0105)):
         f.selection.select(ucode)
         f.paste()
+        f[ucode].width = 0
 
 
 def narrow(g, halfWidth):
