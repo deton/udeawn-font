@@ -8,6 +8,18 @@ UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/East
 * EastAsianWidth.txtでNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小しています。
 * EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[NotoEmojiにある文字](WidthMismatchNotoEmoji.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
   (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
+  ![NotoEmojiから幅を縮めて取り込んでいる絵文字](https://user-images.githubusercontent.com/761487/233821627-4fcf334e-719f-4ac3-b641-4b344fbc1c89.png)
+
+## UDEAWH font
+BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
+(ただし、元々半分幅に収まっている文字は、縮めずに半分領域をそのまま使用。)
+
+一部文字はなるべく縦線が細くならないように幅を縮めていますが、
+それ以外の文字は単に縮めているので、縦線が細めです。
+丸数字等が縦長です。
+
+![udeawh](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
+(wslttyでの表示例。UDEAWHフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
 ## UDEAWN font
 BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
@@ -25,18 +37,18 @@ https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 ![udeawn](https://user-images.githubusercontent.com/761487/232278123-8aa5a254-5bc9-4d3b-9304-225521dfcf37.png)
 (wslttyでの表示例。UDEAWNフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
-## UDEAWH font
-BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
-(ただし、元々半分幅に収まっている文字は、縮めずに半分領域をそのまま使用。)
+## 備考
+### wsltty設定
+wslttyデフォルトだと、ローマ数字(Ⅲⅳ等)の表示幅が75%に縮められて少し読みにくくなるようなので、
+回避したい場合は、設定ファイル(`%APPDATA%\wsltty\config`)に、`CharNarrowing=100`を追加。
 
-一部文字はなるべく縦線が細くならないように幅を縮めていますが、
-それ以外の文字は単に縮めているので、縦線が細めです。
-丸数字等が縦長です。
+### Vim設定
+EastAsianWidth.txtに合わせてNarrowにすると、一部の絵文字が、Vimが想定する表示幅と合わなくなるようなので、
+UDEAWN/UDEAWHの幅に合わせるには、
+cellwidth_udeawn.vimをVimの`'runtimepath'/plugin/`に置いてください。
+(参考 https://github.com/rbtnn/vim-ambiwidth )
 
-![udeawh](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
-(wslttyでの表示例。UDEAWHフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
-
-## ビルド環境
+## ビルド
 
 * OS: Ubuntu 22.04
 * Tools
@@ -49,6 +61,8 @@ sudo apt-get install ttfautohint fontforge python2 python2-pip-whl
 python2 /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl/pip install --no-index /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl
 python2 -m pip install fonttools
 python3 -m pip install ttfautohint-py
+./make-h.sh
+./make.sh
 ```
 
 `pyftmerge`や`ttx`は、`$HOME/.local/bin`に入るので、
