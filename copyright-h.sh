@@ -10,8 +10,8 @@ FONT_PATTERN=${PREFIX}${FAMILYNAME}'*.ttf'
 COPYRIGHT='[BIZ UDGothic]
 Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)
 
-[Noto Emoji]
-Copyright 2013, 2022 Google Inc. (https://github.com/googlefonts/noto-emoji)
+[EmojiOne Color. Black and White version]
+Copyright 2016 Adobe Systems Incorporated (https://github.com/adobe-fonts/emojione-color)
 
 [UDEAWN]
 Copyright (c) 2023 KIHARA, Hideto'

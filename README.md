@@ -6,7 +6,7 @@ wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等を
 UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)にある幅になるべく合わせています。
 
 * EastAsianWidth.txtでNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小しています。
-* EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[NotoEmojiにある文字](WidthMismatchNotoEmoji.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
+* EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[EmojiOne Colorにある文字](WidthMismatchEmojiOne.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
   (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
   ![NotoEmojiから幅を縮めて取り込んでいる絵文字](https://user-images.githubusercontent.com/761487/233821627-4fcf334e-719f-4ac3-b641-4b344fbc1c89.png)
 

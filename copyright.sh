@@ -13,8 +13,8 @@ Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/
 [Illusion]
 Copyright 2019 Tomohiro Matsushima (https://github.com/tomonic-x/Illusion)
 
-[Noto Emoji]
-Copyright 2013, 2022 Google Inc. (https://github.com/googlefonts/noto-emoji)
+[EmojiOne Color. Black and White version]
+Copyright 2016 Adobe Systems Incorporated (https://github.com/adobe-fonts/emojione-color)
 
 [UDEV Gothic]
 Copyright (c) 2022, Yuko Otawara
