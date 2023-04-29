@@ -144,8 +144,10 @@ expect_narrow = (
 emojis = (
     0x203c, 0x2049, 0x20e3, 0x2122, 0x2139, 0x2194, 0x2195, 0x2196, 0x2197,
     0x2198, 0x2199, 0x21a9, 0x21aa, 0x2328, 0x23cf, 0x23ed, 0x23ee, 0x23ef,
-    0x23f1, 0x23f2, 0x23f8, 0x23f9, 0x23fa, 0x24c2, 0x25aa, 0x25ab, 0x25b6,
-    0x25c0, 0x25fb, 0x25fc, 0x2600, 0x2601, 0x2602, 0x2603, 0x2604, 0x260e,
+    0x23f1, 0x23f2, 0x23f8, 0x23f9, 0x23fa, 0x24c2, 0x25b6, 0x25c0,
+    # medium squareの縮小率に合わせてsmall squareを縮小するのでmedium->small順
+    0x25fb, 0x25fc, 0x25aa, 0x25ab,
+    0x2600, 0x2601, 0x2602, 0x2603, 0x2604, 0x260e,
     0x2611, 0x2618, 0x261d, 0x2620, 0x2622, 0x2623, 0x2626, 0x262a, 0x262e,
     0x262f, 0x2638, 0x2639, 0x263a, 0x2640, 0x2642, 0x265f, 0x2660, 0x2663,
     0x2665, 0x2666, 0x2668, 0x267b, 0x267e, 0x2692, 0x2694, 0x2695, 0x2696,
@@ -216,8 +218,15 @@ def add_emoji(f, halfWidth, emojifontfile):
         if ucode not in emojifont:
             continue
         g = emojifont[ucode]
-        if ucode in (0x25fb, 0x25fc, 0x2611, 0x2716):
-            # white medium square(◻), black medium square(◼),
+        if ucode == 0x25fb:  # white medium square(◻)
+            scalewms = scalexy(g, halfWidth)
+        elif ucode == 0x25fc:  # black medium square(◼)
+            scalebms = scalexy(g, halfWidth)
+        elif ucode == 0x25ab:  # white small square(▫)
+            scalexy(g, halfWidth, scale=scalewms)
+        elif ucode == 0x25aa:  # black small square(▪)
+            scalexy(g, halfWidth, scale=scalebms)
+        elif ucode in (0x2611, 0x2716):
             # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         else:
@@ -481,10 +490,13 @@ def g_circledBullet(f, halfWidth):
     centerInWidth(g)
 
 
-def scalexy(g, halfWidth):
+def scalexy(g, halfWidth, *, scale=0):
     """縦方向も横方向と同様に縮める"""
     xmin, ymin, xmax, ymax = g.boundingBox()
-    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    if scale == 0:
+        scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+    else:
+        scalex = scale
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
     trcen = psMat.translate(-cx, -cy)
@@ -493,6 +505,7 @@ def scalexy(g, halfWidth):
     g.transform(psMat.inverse(trcen))
     g.width = halfWidth
     centerInWidth(g)
+    return scalex
 
 
 def g_romanNumeralTwo(f, halfWidth):
