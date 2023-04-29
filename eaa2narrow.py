@@ -408,8 +408,15 @@ def g_circle(g, halfWidth):
 
 
 def g_bullseye(f, halfWidth):
+    # もとからnarrowなfisheyeと同じ線幅になるように縮める
+    gref = f[0x25C9]  # fisheye(◉)
+    layerref = gref.layers[gref.activeLayer]
+    xminref1, yminref1, xmaxref1, ymaxref1 = layerref[1].boundingBox()  # 外側
+    xminref2, yminref2, xmaxref2, ymaxref2 = layerref[2].boundingBox()  # 内側
+    boxwref = xmaxref1 - xminref1
+    linewidth = ymaxref1 - ymaxref2
+
     g = f[0x25CE]  # bullseye(◎)
-    # 線が細くなって見にくくならないように。XXX:太すぎるかも?
     layer = g.layers[g.activeLayer]
     xmin2, ymin2, xmax2, ymax2 = layer[2].boundingBox()  # 外側の輪
     xmin3, ymin3, xmax3, ymax3 = layer[3].boundingBox()
@@ -417,13 +424,13 @@ def g_bullseye(f, halfWidth):
     xmin1, ymin1, xmax1, ymax1 = layer[1].boundingBox()
     boxw2 = xmax2 - xmin2
     scale2 = halfWidth / (boxw2 + SIDE_BEARING)
-    linewidth = ymax2 - ymax3
     cx = (xmin2 + xmax2) / 2
     cy = (ymin2 + ymax2) / 2
     trcen = psMat.translate(-cx, -cy)
     layer.transform(trcen)
     layer[2].transform(psMat.scale(scale2, scale2))
 
+    # 線の幅が合うようなscaleを算出して縮める
     boxw3 = xmax3 - xmin3
     # expect: boxw2 * scale2 = linewidth + boxw3 * scale3 + linewidth
     scale3 = (boxw2 * scale2 - linewidth * 2) / boxw3
