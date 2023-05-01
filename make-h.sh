@@ -20,6 +20,12 @@ then
   unzip -d source/NotoEmoji/ source/NotoEmoji.zip
 fi
 
+if [ ! -d source/dejavu-fonts-ttf-2.37 ]
+then
+  curl -L https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.zip -o source/dejavu-fonts-ttf-2.37.zip
+  unzip -d source/ source/dejavu-fonts-ttf-2.37.zip
+fi
+
 "${BASE_DIR}/generator-h.sh" "$VERSION" "$FAMILYNAME"
 "${BASE_DIR}/os2_patch.sh" "$FAMILYNAME" "" 0
 "${BASE_DIR}/copyright-h.sh" "$FAMILYNAME"
