@@ -724,6 +724,24 @@ def g_arrowdblb(f, halfWidth):
     centerInWidth(g)
 
 
+def g_arrowupdn(f, halfWidth):
+    f.selection.select(0x2191)  # arrowup(↑)
+    f.copy()
+    f.selection.select(0x2195)
+    f.paste()
+    g = f[0x2195]
+    layer = g.layers[g.activeLayer]
+    c = layer[0]
+    gd = f[0x2193]  # arrowdown(↓)
+    layerd = gd.layers[gd.activeLayer]
+    cd = layerd[0]
+    # 下向き矢じりに置き換える
+    c[4:6] = [p for p in cd[2:]]
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def g_blackarrowlr(f, halfWidth):
     # 幅を縮めた後に矢柄を短くして、矢じりを大きくして見やすくする
     # (単にtrimleft()すると矢柄がほとんど無くなる)
@@ -1000,6 +1018,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_because(font, halfWidth)
     g_whiteTriangleDU(font, halfWidth)
     g_arrowdblb(font, halfWidth)
+    g_arrowupdn(font, halfWidth)
     g_infinity(font, halfWidth)
     g_proportional(font, halfWidth)
     g_degreeCelsius(font[0x2103], halfWidth)  # degree celsius(℃)
