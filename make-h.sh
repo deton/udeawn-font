@@ -14,10 +14,9 @@ then
   mkdir "$BUILD_DIR"
 fi
 
-if [ ! -d source/NotoEmoji ]
+if [ ! -d source/NotoEmoji.otf ]
 then
-  curl -L https://fonts.google.com/download?family=Noto%20Emoji -o source/NotoEmoji.zip
-  unzip -d source/NotoEmoji/ source/NotoEmoji.zip
+  curl -L https://github.com/adobe-fonts/noto-emoji-svg/releases/download/2.100/NotoEmoji.otf -o source/NotoEmoji.otf
 fi
 
 "${BASE_DIR}/generator-h.sh" "$VERSION" "$FAMILYNAME"
