@@ -21,17 +21,17 @@ jobs:
 
       - name: Make directories for upload-artifact
         run: |
-          mkdir UDEAWN_${{ github.ref_name }}
-          mv build/UDEAWN-* UDEAWN_${{ github.ref_name }}
-          mkdir UDEAWH_${{ github.ref_name }}
-          mv build/UDEAWH-* UDEAWH_${{ github.ref_name }}
+          mkdir UDEAWNi_${{ github.ref_name }}
+          mv build/UDEAWNi-* UDEAWNi_${{ github.ref_name }}
+          mkdir UDEAWNn_${{ github.ref_name }}
+          mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: UDEAWN_${{ github.ref_name }}
-          path: UDEAWN_${{ github.ref_name }}
+          name: UDEAWNi_${{ github.ref_name }}
+          path: UDEAWNi_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: UDEAWH_${{ github.ref_name }}
-          path: UDEAWH_${{ github.ref_name }}
+          name: UDEAWNn_${{ github.ref_name }}
+          path: UDEAWNn_${{ github.ref_name }}
