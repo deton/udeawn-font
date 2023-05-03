@@ -18,16 +18,37 @@ jobs:
         run: |
           ./make-n.sh
           ./make-s.sh
+          ./make-o.sh
+          ./make-d.sh
           ./make.sh
 
       - name: Make directories for upload-artifact
         run: |
           mkdir UDEAWNi_${{ github.ref_name }}
           mv build/UDEAWNi-* UDEAWNi_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNi_${{ github.ref_name }}
+          cp source/LICENSE_Illusion UDEAWNi_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNi_${{ github.ref_name }}/LICENSE_NotoEmoji
+      - run: |
           mkdir UDEAWNn_${{ github.ref_name }}
           mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNn_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNn_${{ github.ref_name }}/LICENSE_NotoEmoji
+      - run: |
           mkdir UDEAWNs_${{ github.ref_name }}
           mv build/UDEAWNs-* UDEAWNs_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
+      - run: |
+          mkdir UDEAWNo_${{ github.ref_name }}
+          mv build/UDEAWNo-* UDEAWNo_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNo_${{ github.ref_name }}
+          cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
+      - run: |
+          mkdir UDEAWNd_${{ github.ref_name }}
+          mv build/UDEAWNd-* UDEAWNd_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNd_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNd_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp source/dejavu-fonts-ttf-2.37/LICENSE UDEAWNd_${{ github.ref_name }}/LICENSE_dejavu
 
       - uses: actions/upload-artifact@v3
         with:
@@ -43,3 +64,13 @@ jobs:
         with:
           name: UDEAWNs_${{ github.ref_name }}
           path: UDEAWNs_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEAWNo_${{ github.ref_name }}
+          path: UDEAWNo_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEAWNd_${{ github.ref_name }}
+          path: UDEAWNd_${{ github.ref_name }}

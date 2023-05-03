@@ -1,7 +1,7 @@
 #!/usr/bin/fontforge
 # East Asian Ambiguousなグリフの幅を半分に縮める
-#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf]
-#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
+#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf] [emojifont2.ttf]
+#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf source/dejavu-fonts-ttf-2.37/ttf/DejaVuSansMono.ttf
 import datetime
 import math
 import sys
@@ -201,7 +201,11 @@ def narrow(g, halfWidth):
 
 
 def add_emoji(f, halfWidth, emojifontfile):
-    """(主にAmbiguous幅な)絵文字をNarrowにしてコピペする"""
+    """
+    Ambiguous幅な絵文字や、
+    fallbackフォントでWide幅だが、EastAsianWidth.txtで;Wでも;Fでもない絵文字を
+    Narrowにしてコピペする
+    """
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
@@ -237,6 +241,29 @@ def add_emoji(f, halfWidth, emojifontfile):
         f.selection.select(ucode)
         f.paste()
     emojifont.close()
+
+
+def add_emoji2(f, halfWidth, emojifontfile2):
+    """
+    NotoEmojiだとNarrowにした時に見にくい絵文字(白抜き/細かくて線が細い)は
+    元からNarrowなDejaVuSansMonoから取込
+    """
+    if not emojifontfile2:
+        return
+    emojifont2 = fontforge.open(emojifontfile2)
+    for ucode in (0x260f,  # Ambiguous。NotoEmojiに無い
+                  0x2122, 0x2618, 0x2639, 0x263a, 0x267b, 0x2692, 0x2694,
+                  0x2696, 0x2699, 0x26a0, 0x2763, 0x2764,
+                  # NotoEmojiだと枠付き
+                  0x2626, 0x262a, 0x262e, 0x262f, 0x2638, 0x267e, 0x269b,
+                  0x271d, 0x2721):
+        g = emojifont2[ucode]
+        narrow(g, halfWidth)
+        emojifont2.selection.select(ucode)
+        emojifont2.copy()
+        f.selection.select(ucode)
+        f.paste()
+    emojifont2.close()
 
 
 def g_twoDotLeader(f, halfWidth):
@@ -1011,7 +1038,7 @@ def centerInWidth(g):
     g.width = w  # g.widthが縮む場合があるので再設定
 
 
-def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
+def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2):
     font = fontforge.open(fontfile)
 
     # 半角スペースから幅を取得
@@ -1019,6 +1046,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
 
     add_variationSelector(font)
     add_emoji(font, halfWidth, emojifontfile)
+    add_emoji2(font, halfWidth, emojifontfile2)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
     g_greek(font, halfWidth)
@@ -1118,9 +1146,13 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
 
 
 if __name__ == '__main__':
-    # fontfile, fontfamily, fontstyle, version, emojifontfile
+    # fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
+    if len(sys.argv) > 6:
+        emojifontfile2 = sys.argv[6]
+    else:
+        emojifontfile2 = None
     if len(sys.argv) > 5:
         emojifontfile = sys.argv[5]
     else:
         emojifontfile = None
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile)
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile, emojifontfile2)
