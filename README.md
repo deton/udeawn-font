@@ -1,4 +1,4 @@
-# UDEAWN/UDEAWH font
+# UDEAWN font
 
 wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等をNarrowにしたフォントです。
 
@@ -10,7 +10,7 @@ UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/East
   (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
   ![NotoEmojiから幅を縮めて取り込んでいる絵文字](https://user-images.githubusercontent.com/761487/233821627-4fcf334e-719f-4ac3-b641-4b344fbc1c89.png)
 
-## UDEAWH font
+## UDEAWNn font
 BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
 (ただし、元々半分幅に収まっている文字は、縮めずに半分領域をそのまま使用。)
 
@@ -18,10 +18,10 @@ BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮
 それ以外の文字は単に縮めているので、縦線が細めです。
 丸数字等が縦長です。
 
-![udeawh](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
-(wslttyでの表示例。UDEAWHフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
+![udeawnn](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
+(wslttyでの表示例。UDEAWNnフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
-## UDEAWN font
+## UDEAWNi font
 BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
 
 East Asian Ambiguous文字に関して、
@@ -35,7 +35,7 @@ East Asian Ambiguous文字のリストは以下を参考に使用。
 https://github.com/uwabami/locale-eaw-emoji/blob/master/EastAsianAmbiguous.txt
 
 ![udeawn](https://user-images.githubusercontent.com/761487/232278123-8aa5a254-5bc9-4d3b-9304-225521dfcf37.png)
-(wslttyでの表示例。UDEAWNフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
+(wslttyでの表示例。UDEAWNiフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
 
 ## 備考
 ### wsltty設定
@@ -44,7 +44,7 @@ wslttyデフォルトだと、ローマ数字(Ⅲⅳ等)の表示幅が75%に縮
 
 ### Vim設定
 EastAsianWidth.txtに合わせてNarrowにすると、一部の絵文字が、Vimが想定する表示幅と合わなくなるようなので、
-UDEAWN/UDEAWHの幅に合わせるには、
+UDEAWNの幅に合わせるには、
 cellwidth_udeawn.vimをVimの`'runtimepath'/plugin/`に置いてください。
 (参考 https://github.com/rbtnn/vim-ambiwidth )
 

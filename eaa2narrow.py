@@ -1,7 +1,7 @@
 #!/usr/bin/fontforge
 # East Asian Ambiguousなグリフの幅を半分に縮める
 #   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf]
-#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWH Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
+#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
 import datetime
 import math
 import sys
@@ -1077,7 +1077,7 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
         narrow(g, halfWidth)
 
     # 修正後のフォントファイルを保存
-    copyright = "###COPYRIGHT###"
+    copyright = open(f'copyright-{fontfamily}.txt').read()
     uniqueid = f"{fontfamily} : {datetime.datetime.now().strftime('%d-%m-%Y')}"
 
     # TTF名設定 - 英語
