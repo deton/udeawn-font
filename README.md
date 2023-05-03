@@ -26,7 +26,17 @@ BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮
 UDEAWNnで取り込み対象にする絵文字に関して、Noto Emojiのかわりに
 [Noto Emoji SVG](https://github.com/adobe-fonts/noto-emoji-svg/)
 を使った版です。
+
 * 絵文字が、黒白表示の際に黒が多くて少し見やすい印象。(上下のはみ出し多め)
+
+### UDEAWNo font
+取り込み対象にする絵文字に関して、
+[EmojiOne Color. Black and White version](https://github.com/adobe-fonts/emojione-color)
+[にある文字](WidthMismatchEmojiOne.txt)を使った版です。
+
+* 絵文字が、Noto Emojiよりも見やすい印象。
+* ただしNoto Emojiに比べて取り込み対象が4文字少ない。
+* U+20E3(combining enclosing keycap)がつぶれて、中の文字が見えない
 
 ## UDEAWNi font
 BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
