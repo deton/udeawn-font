@@ -6,9 +6,6 @@ wsltty等の端末エミュレータ向けに、East Asian Ambiguous文字等を
 UAX#11の[EastAsianWidth.txt](https://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt)にある幅になるべく合わせています。
 
 * EastAsianWidth.txtでNarrowなのに[BIZ UDゴシックではWideな文字](WidthMismatch.txt)も、FontForgeで半分幅に縮小しています。
-* EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[NotoEmojiにある文字](WidthMismatchNotoEmoji.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
-  (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
-  ![NotoEmojiから幅を縮めて取り込んでいる絵文字](https://user-images.githubusercontent.com/761487/233821627-4fcf334e-719f-4ac3-b641-4b344fbc1c89.png)
 
 ## UDEAWNn font
 BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮めたもの。
@@ -18,8 +15,18 @@ BIZ UDゴシック内のEast Asian Ambiguous文字をFontForgeで半分幅に縮
 それ以外の文字は単に縮めているので、縦線が細めです。
 丸数字等が縦長です。
 
+* EastAsianWidth.txtでNarrowまたはAmbiguousで、BIZ UDゴシックに含まれない絵文字で、[NotoEmojiにある文字](WidthMismatchNotoEmoji.txt)に関して、FontForgeで半分幅に縮小して取り込んでいます。
+  (でないと、fallbackフォントでWide幅で表示される場合が多いようなので)
+  ![NotoEmojiから幅を縮めて取り込んでいる絵文字](https://user-images.githubusercontent.com/761487/233821627-4fcf334e-719f-4ac3-b641-4b344fbc1c89.png)
+
 ![udeawnn](https://user-images.githubusercontent.com/761487/232277599-22a81805-88a7-4e17-b689-1c011c2a9ed6.png)
 (wslttyでの表示例。UDEAWNnフォントに含まれない文字は灰色背景。fallbackフォントで表示されている。)
+
+### UDEAWNs font
+UDEAWNnで取り込み対象にする絵文字に関して、Noto Emojiのかわりに
+[Noto Emoji SVG](https://github.com/adobe-fonts/noto-emoji-svg/)
+を使った版です。
+* 絵文字が、黒白表示の際に黒が多くて少し見やすい印象。(上下のはみ出し多め)
 
 ## UDEAWNi font
 BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
@@ -61,7 +68,7 @@ sudo apt-get install ttfautohint fontforge python2 python2-pip-whl
 python2 /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl/pip install --no-index /usr/share/python-wheels/pip-20.3.4-py2.py3-none-any.whl
 python2 -m pip install fonttools
 python3 -m pip install ttfautohint-py
-./make-h.sh
+./make-n.sh
 ./make.sh
 ```
 

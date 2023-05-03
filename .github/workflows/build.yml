@@ -16,7 +16,8 @@ jobs:
 
       - name: Build
         run: |
-          ./make-h.sh
+          ./make-n.sh
+          ./make-s.sh
           ./make.sh
 
       - name: Make directories for upload-artifact
@@ -25,6 +26,8 @@ jobs:
           mv build/UDEAWNi-* UDEAWNi_${{ github.ref_name }}
           mkdir UDEAWNn_${{ github.ref_name }}
           mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
+          mkdir UDEAWNs_${{ github.ref_name }}
+          mv build/UDEAWNs-* UDEAWNs_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
@@ -35,3 +38,8 @@ jobs:
         with:
           name: UDEAWNn_${{ github.ref_name }}
           path: UDEAWNn_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEAWNs_${{ github.ref_name }}
+          path: UDEAWNs_${{ github.ref_name }}
