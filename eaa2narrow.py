@@ -251,12 +251,11 @@ def add_emoji2(f, halfWidth, emojifontfile2):
     if not emojifontfile2:
         return
     emojifont2 = fontforge.open(emojifontfile2)
-    for ucode in (0x260f,  # Ambiguous。NotoEmojiに無い
-                  0x2122, 0x2618, 0x2639, 0x263a, 0x267b, 0x2692, 0x2694,
-                  0x2696, 0x2699, 0x26a0, 0x2763, 0x2764,
-                  # NotoEmojiだと枠付き
-                  0x2626, 0x262a, 0x262e, 0x262f, 0x2638, 0x267e, 0x269b,
-                  0x271d, 0x2721):
+    for ucode in (0x260f,) + emojis:
+        if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
+            continue
+        if ucode not in emojifont2:
+            continue
         g = emojifont2[ucode]
         narrow(g, halfWidth)
         emojifont2.selection.select(ucode)
@@ -1051,8 +1050,8 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
     halfWidth = font[0x0020].width
 
     add_variationSelector(font)
-    add_emoji(font, halfWidth, emojifontfile)
     add_emoji2(font, halfWidth, emojifontfile2)
+    add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
     g_greek(font, halfWidth)
