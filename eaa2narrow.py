@@ -520,8 +520,14 @@ def g_circledBullet(f, halfWidth):
 def scalexy(g, halfWidth, *, scale=0):
     """縦方向も横方向と同様に縮める"""
     xmin, ymin, xmax, ymax = g.boundingBox()
+    boxw = xmax - xmin
     if scale == 0:
-        scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
+        scalex = halfWidth / (boxw + SIDE_BEARING)
+    elif boxw < halfWidth * 0.9:
+        # XXX:NotoEmojiのsmall squareを縮めすぎると見にくいのでそのままにする。
+        # medium squareはhalfWidth幅に縮小済なのでその幅より0.9未満ならば、
+        # 縮めずそのままにする。
+        scalex = 1
     else:
         scalex = scale
     cx = (xmin + xmax) / 2
