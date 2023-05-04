@@ -38,6 +38,13 @@ UDEAWNnで取り込み対象にする絵文字に関して、Noto Emojiのかわ
 * ただしNoto Emojiに比べて取り込み対象が4文字少ない。
 * U+20E3(combining enclosing keycap)がつぶれて、中の文字が見えない
 
+### UDEAWNd font
+NotoEmojiでNarrow化時に見にくい絵文字は
+[DejaVuSansMono](https://github.com/dejavu-fonts/dejavu-fonts)から取込
+
+NotoEmojiに無い/白抜き/細かくて線が細い/枠付きなので縮めると細くなりがち、
+な絵文字を、元からNarrowなDejaVuSansMonoから取込。
+
 ## UDEAWNi font
 BIZ UDゴシック内のEast Asian Ambiguous文字の多くをIllusion-Nフォントにしたもの。
 

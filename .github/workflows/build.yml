@@ -29,26 +29,32 @@ jobs:
           cp source/LICENSE_BIZUDGothic UDEAWNi_${{ github.ref_name }}
           cp source/LICENSE_Illusion UDEAWNi_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNi_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNi UDEAWNi_${{ github.ref_name }}
       - run: |
           mkdir UDEAWNn_${{ github.ref_name }}
           mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNn_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNn_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNn UDEAWNn_${{ github.ref_name }}
       - run: |
           mkdir UDEAWNs_${{ github.ref_name }}
           mv build/UDEAWNs-* UDEAWNs_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNs_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNs UDEAWNs_${{ github.ref_name }}
       - run: |
           mkdir UDEAWNo_${{ github.ref_name }}
           mv build/UDEAWNo-* UDEAWNo_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNo_${{ github.ref_name }}
           cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
+          cp LICENSE_UDEAWNo UDEAWNo_${{ github.ref_name }}
       - run: |
           mkdir UDEAWNd_${{ github.ref_name }}
           mv build/UDEAWNd-* UDEAWNd_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNd_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNd_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp source/dejavu-fonts-ttf-2.37/LICENSE UDEAWNd_${{ github.ref_name }}/LICENSE_dejavu
+          cp LICENSE_UDEAWNd UDEAWNd_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
