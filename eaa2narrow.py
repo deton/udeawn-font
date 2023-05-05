@@ -204,8 +204,8 @@ def g_warningsign(f, g, halfWidth):
     # !の幅は縮めずに△の下側左右端の位置を移動することで幅を縮める。
     # 全体の幅を縮めると!も細くなって見にくくなるので。
 
-    def getouteridx(layer):
-        # 外側白三角の2つのcontourを特定する。bboxの大きいもの2つ。
+    def getsizeidx(layer):
+        # 各contourのbboxの面積が大きい順のindexリストを返す。
         # (emojifontごとに、どのlayerが外側白三角に該当するかが異なるので)
         layersizes = []
         for idx, c in enumerate(layer):
@@ -213,8 +213,7 @@ def g_warningsign(f, g, halfWidth):
             boxsize = (xmax - xmin) * (ymax - ymin)
             layersizes.append((idx, boxsize))
         layersizes.sort(key=lambda x: x[1], reverse=True)
-        outeridx = [x[0] for x in layersizes[:2]]
-        return outeridx
+        return [x[0] for x in layersizes]
 
     xmin, ymin, xmax, ymax = g.boundingBox()
     boxw = xmax - xmin
@@ -225,21 +224,21 @@ def g_warningsign(f, g, halfWidth):
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
     layer = g.layers[g.activeLayer]
-    outeridx = getouteridx(layer)
+    sizeidx = getsizeidx(layer)
     # 上下にはみ出ている
-    dy = 0
     if ymin < -f.descent:  # fはUDEAWN。g.fontはemojifont
         dy = -f.descent - ymin
-        # 下端を上に移動
-        layer[outeridx[0]].transform(psMat.translate(0, dy))
-        layer[outeridx[1]].transform(psMat.translate(0, dy))
-    ymax += dy
+        # 外側白三角を上に移動して、下端を枠に収める
+        layer[sizeidx[0]].transform(psMat.translate(0, dy))
+        layer[sizeidx[1]].transform(psMat.translate(0, dy))
+        ymax += dy
     dya = 0
     if ymax > f.ascent:
         dya = f.ascent - ymax
     for idx, c in enumerate(layer):
-        if idx not in outeridx:
+        if idx not in sizeidx[:2]:
             continue
+        # 外側白三角
         for p in c:
             if p.y < cy:  # 下側端を左右に移動
                 if p.x < cx:
@@ -248,6 +247,23 @@ def g_warningsign(f, g, halfWidth):
                     p.x -= dx
             if p.y > cy:  # 上端がはみ出ないように下に移動
                 p.y += dya
+
+    # !が上寄りなので少し下に移動する。
+    # 外側白三角の内側の下線と、下の点の間隔が、上の棒と下の点の間隔と同じに
+    # なるように移動。(XXX:少し下げすぎかも?)
+    ctriin = layer[sizeidx[1]]  # 外側白三角の内側
+    cbar = layer[sizeidx[2]]  # 上の棒
+    cdot = layer[sizeidx[3]]  # 下の点
+    xminb, yminb, xmaxb, ymaxb = cbar.boundingBox()
+    xmind, ymind, xmaxd, ymaxd = cdot.boundingBox()
+    ydiffref = yminb - ymaxd
+    xmint, ymint, xmaxt, ymaxt = ctriin.boundingBox()
+    ydiff = ymind - ymint
+    if ydiff > ydiffref:
+        dy = ydiff - ydiffref
+        cdot.transform(psMat.translate(0, -dy))
+        cbar.transform(psMat.translate(0, -dy))
+
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
     centerInWidth(g)
