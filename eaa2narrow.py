@@ -200,6 +200,59 @@ def narrow(g, halfWidth):
     centerInWidth(g)
 
 
+def g_warningsign(f, g, halfWidth):
+    # !の幅は縮めずに△の下側左右端の位置を移動することで幅を縮める。
+    # 全体の幅を縮めると!も細くなって見にくくなるので。
+
+    def getouteridx(layer):
+        # 外側白三角の2つのcontourを特定する。bboxの大きいもの2つ。
+        # (emojifontごとに、どのlayerが外側白三角に該当するかが異なるので)
+        layersizes = []
+        for idx, c in enumerate(layer):
+            xmin, ymin, xmax, ymax = c.boundingBox()
+            boxsize = (xmax - xmin) * (ymax - ymin)
+            layersizes.append((idx, boxsize))
+        layersizes.sort(key=lambda x: x[1], reverse=True)
+        outeridx = [x[0] for x in layersizes[:2]]
+        return outeridx
+
+    xmin, ymin, xmax, ymax = g.boundingBox()
+    boxw = xmax - xmin
+    if boxw <= halfWidth:
+        return
+    # expect: ((xmax - dx) - (xmin + dx) + SIDE_BEARING) <= halfWidth
+    dx = (xmax - xmin + SIDE_BEARING - halfWidth) / 2
+    cx = (xmin + xmax) / 2
+    cy = (ymin + ymax) / 2
+    layer = g.layers[g.activeLayer]
+    outeridx = getouteridx(layer)
+    # 上下にはみ出ている
+    dy = 0
+    if ymin < -f.descent:  # fはUDEAWN。g.fontはemojifont
+        dy = -f.descent - ymin
+        # 下端を上に移動
+        layer[outeridx[0]].transform(psMat.translate(0, dy))
+        layer[outeridx[1]].transform(psMat.translate(0, dy))
+    ymax += dy
+    dya = 0
+    if ymax > f.ascent:
+        dya = f.ascent - ymax
+    for idx, c in enumerate(layer):
+        if idx not in outeridx:
+            continue
+        for p in c:
+            if p.y < cy:  # 下側端を左右に移動
+                if p.x < cx:
+                    p.x += dx
+                else:
+                    p.x -= dx
+            if p.y > cy:  # 上端がはみ出ないように下に移動
+                p.y += dya
+    g.setLayer(layer, g.activeLayer)
+    g.width = halfWidth
+    centerInWidth(g)
+
+
 def add_emoji(f, halfWidth, emojifontfile):
     """
     Ambiguous幅な絵文字や、
@@ -233,6 +286,9 @@ def add_emoji(f, halfWidth, emojifontfile):
         elif ucode in (0x2611, 0x2716):
             # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
+        elif ucode == 0x26a0:  # warning sign(⚠)
+            g.transform(psMat.translate(0, ydiff))
+            g_warningsign(f, g, halfWidth)
         else:
             g.transform(psMat.translate(0, ydiff))
             narrow(g, halfWidth)
