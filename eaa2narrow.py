@@ -11,7 +11,7 @@ import psMat
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
 # 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
 # XXX:大きくしても(512)、ローマ数字(U+2161 Ⅱ等)は上記設定で縮められる模様
-SIDE_BEARING = 30
+SIDE_BEARING = 60
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
