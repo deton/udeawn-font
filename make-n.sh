@@ -27,7 +27,7 @@ fi
 FONTS_DIRECTORIES="${BASE_DIR}/source/"
 SRC_FONT_BIZUD_REGULAR='fontforge_export_BIZUDGothic-Regular.ttf'
 SRC_FONT_BIZUD_BOLD='fontforge_export_BIZUDGothic-Bold.ttf'
-SRC_FONT_NOTOEMOJI_REGULAR='NotoEmoji-Regular.ttf'
+SRC_FONT_NOTOEMOJI_REGULAR='NotoEmoji-SemiBold.ttf'
 SRC_FONT_NOTOEMOJI_BOLD='NotoEmoji-Bold.ttf'
 
 PATH_BIZUD_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_REGULAR"`
