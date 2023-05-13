@@ -18,8 +18,6 @@ jobs:
         run: |
           ./make-n.sh
           ./make-s.sh
-          ./make-o.sh
-          ./make-d.sh
           ./make.sh
 
       - name: Make directories for upload-artifact
@@ -42,19 +40,6 @@ jobs:
           cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNs_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNs UDEAWNs_${{ github.ref_name }}
-      - run: |
-          mkdir UDEAWNo_${{ github.ref_name }}
-          mv build/UDEAWNo-* UDEAWNo_${{ github.ref_name }}
-          cp source/LICENSE_BIZUDGothic UDEAWNo_${{ github.ref_name }}
-          cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
-          cp LICENSE_UDEAWNo UDEAWNo_${{ github.ref_name }}
-      - run: |
-          mkdir UDEAWNd_${{ github.ref_name }}
-          mv build/UDEAWNd-* UDEAWNd_${{ github.ref_name }}
-          cp source/LICENSE_BIZUDGothic UDEAWNd_${{ github.ref_name }}
-          cp source/NotoEmoji/OFL.txt UDEAWNd_${{ github.ref_name }}/LICENSE_NotoEmoji
-          cp source/dejavu-fonts-ttf-2.37/LICENSE UDEAWNd_${{ github.ref_name }}/LICENSE_dejavu
-          cp LICENSE_UDEAWNd UDEAWNd_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
@@ -70,13 +55,3 @@ jobs:
         with:
           name: UDEAWNs_${{ github.ref_name }}
           path: UDEAWNs_${{ github.ref_name }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: UDEAWNo_${{ github.ref_name }}
-          path: UDEAWNo_${{ github.ref_name }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: UDEAWNd_${{ github.ref_name }}
-          path: UDEAWNd_${{ github.ref_name }}
