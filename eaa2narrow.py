@@ -1,7 +1,7 @@
 #!/usr/bin/fontforge
 # East Asian Ambiguousなグリフの幅を半分に縮める
-#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf] [emojifont2.ttf]
-#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf source/dejavu-fonts-ttf-2.37/ttf/DejaVuSansMono.ttf
+#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf]
+#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
 import datetime
 import math
 import sys
@@ -306,28 +306,6 @@ def add_emoji(f, halfWidth, emojifontfile):
         f.selection.select(ucode)
         f.paste()
     emojifont.close()
-
-
-def add_emoji2(f, halfWidth, emojifontfile2):
-    """
-    NotoEmojiだとNarrowにした時に見にくい絵文字(白抜き/細かくて線が細い)は
-    元からNarrowなDejaVuSansMonoから取込
-    """
-    if not emojifontfile2:
-        return
-    emojifont2 = fontforge.open(emojifontfile2)
-    for ucode in (0x260f,) + emojis:
-        if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
-            continue
-        if ucode not in emojifont2:
-            continue
-        g = emojifont2[ucode]
-        narrow(g, halfWidth)
-        emojifont2.selection.select(ucode)
-        emojifont2.copy()
-        f.selection.select(ucode)
-        f.paste()
-    emojifont2.close()
 
 
 def g_twoDotLeader(f, halfWidth):
@@ -1108,14 +1086,13 @@ def centerInWidth(g):
     g.width = w  # g.widthが縮む場合があるので再設定
 
 
-def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2):
+def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     font = fontforge.open(fontfile)
 
     # 半角スペースから幅を取得
     halfWidth = font[0x0020].width
 
     add_variationSelector(font)
-    add_emoji2(font, halfWidth, emojifontfile2)
     add_emoji(font, halfWidth, emojifontfile)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
@@ -1216,13 +1193,9 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
 
 
 if __name__ == '__main__':
-    # fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
-    if len(sys.argv) > 6:
-        emojifontfile2 = sys.argv[6]
-    else:
-        emojifontfile2 = None
+    # fontfile, fontfamily, fontstyle, version, emojifontfile
     if len(sys.argv) > 5:
         emojifontfile = sys.argv[5]
     else:
         emojifontfile = None
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile, emojifontfile2)
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile)
