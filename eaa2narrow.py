@@ -281,7 +281,9 @@ def add_emoji(f, halfWidth, emojifontfile):
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
-    #emojifont.em = f.em  # EmojiOneBWを拡大
+    # regional indicator symbol letter群のbboxの最大幅。
+    # 文字ごとにscaleがばらばらだとIだけ太くて違和感があるのでそろえるため。
+    regional_indicator_maxboxw = maxboxwidth(emojifont, range(0x1f1e6, 0x1f200))
     for ucode in emojis:
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
@@ -312,7 +314,13 @@ def add_emoji(f, halfWidth, emojifontfile):
             # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
             ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
             g.transform(psMat.translate(0, ydiff))
-            narrow(g, halfWidth)
+            if ucode in range(0x1f1e6, 0x1f200):
+                # TODO: "Q"向けにbaseline考慮要
+                g.transform(psMat.scale(halfWidth / regional_indicator_maxboxw, 1))
+                g.width = halfWidth
+                centerInWidth(g)
+            else:
+                narrow(g, halfWidth)
         emojifont.selection.select(ucode)
         emojifont.copy()
         f.selection.select(ucode)
@@ -1010,12 +1018,12 @@ def g_whiteTriangleDU(f, halfWidth):
     centerInWidth(g)
 
 
-def maxboxwidth(f, ucoderange):
+def maxboxwidth(f, ucoderange, eaw_array=None):
     maxboxw = 0
     for ucode in ucoderange:
         if ucode not in f:
             continue
-        if ucode not in eaw_array:
+        if eaw_array and ucode not in eaw_array:
             continue
         g = f[ucode]
         if not g.isWorthOutputting():
@@ -1046,7 +1054,7 @@ def narrow_withscale(f, halfWidth, scalex, ucoderange):
 def g_greek(f, halfWidth):
     """Ambiguousなギリシャ文字をNarrowにする"""
     # ギリシャ文字群のbboxの最大幅
-    maxboxw = maxboxwidth(f, range(0x0370, 0x0400))
+    maxboxw = maxboxwidth(f, range(0x0370, 0x0400), eaw_array)
     # scalex=0.5だと細すぎる印象があるのでなるべく大きくなるようにしたい。
     # かといって文字ごとにscaleがばらばらだと大きさがそろわず読みにくい。
     # ただし、0.53 (=1024/1921)なので0.5と違いがわからない程度
@@ -1058,7 +1066,7 @@ def g_greek(f, halfWidth):
 def g_cyrillic(f, halfWidth):
     """Ambiguousなキリル文字をNarrowにする"""
     # キリル文字群のbboxの最大幅
-    maxboxw = maxboxwidth(f, range(0x0400, 0x0500))
+    maxboxw = maxboxwidth(f, range(0x0400, 0x0500), eaw_array)
     scalex = halfWidth / maxboxw  # 0.55
     # Unicode Block: Cyrillic
     narrow_withscale(f, halfWidth, scalex, range(0x0400, 0x0500))
