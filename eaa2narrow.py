@@ -268,16 +268,20 @@ def add_emoji(f, halfWidth, emojifontfile):
     fallbackフォントでWide幅だが、EastAsianWidth.txtで;Wでも;Fでもない絵文字を
     Narrowにしてコピペする
     """
+
+    def getydiff():
+        g = emojifont[0x26d3]  # chains(⛓)
+        xmin, ymin, xmax, ymax = g.boundingBox()
+        boxh = ymax - ymin
+        # ymax位置をf.ascent+余白の位置に配置
+        # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
+        ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
+        return ydiff
+
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
-    emojifont.em = f.em  # 拡大
-    g = emojifont[0x26d3]  # chains(⛓)
-    xmin, ymin, xmax, ymax = g.boundingBox()
-    boxh = ymax - ymin
-    # ymax位置をf.ascent+余白の位置に配置
-    # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
-    ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
+    #emojifont.em = f.em  # EmojiOneBWを拡大
     for ucode in emojis:
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
@@ -296,9 +300,17 @@ def add_emoji(f, halfWidth, emojifontfile):
             # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         elif ucode == 0x26a0:  # warning sign(⚠)
-            g.transform(psMat.translate(0, ydiff))
             g_warningsign(f, g, halfWidth)
         else:
+            xmin, ymin, xmax, ymax = g.boundingBox()
+            boxh = ymax - ymin
+            if boxh > f.em:  # 上下がはみ出る場合、収まるように縮める
+                g.transform(psMat.scale(1, f.em / boxh))
+                xmin, ymin, xmax, ymax = g.boundingBox()
+                boxh = ymax - ymin
+            # ymax位置をf.ascent+余白の位置に配置
+            # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
+            ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
             g.transform(psMat.translate(0, ydiff))
             narrow(g, halfWidth)
         emojifont.selection.select(ucode)
