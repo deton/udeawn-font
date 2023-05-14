@@ -274,20 +274,24 @@ def add_emoji(f, halfWidth, emojifontfile):
         # ymax位置をf.ascent+余白の位置に配置
         # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
         ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
-        return ydiff
+        cy = (ymax + ymin) / 2 + ydiff
+        return ydiff, cy
 
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
-    # regional indicator symbol letter群のbboxの最大幅。
-    # 文字ごとにscaleがばらばらだとIだけ太くて違和感があるのでそろえるため。
-    regional_indicator_maxboxw = maxboxwidth(emojifont, range(0x1f1e6, 0x1f200))
+    ydiff, cy = getydiff()
+    trcen = psMat.translate(0, -cy)
+    # regional indicator symbol letter群用のscale。
+    # 文字ごとにscaleがばらばらだとIだけ太くて違和感があるのでそろえる。
+    regional_indicator_scale = halfWidth / maxboxwidth(emojifont, range(0x1f1e6, 0x1f200))
     for ucode in emojis:
         if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
             continue
         if ucode not in emojifont:
             continue
         g = emojifont[ucode]
+        g.transform(psMat.translate(0, ydiff))
         if ucode in (0x25fb, 0x25fc, 0x2611, 0x2716):
             # white medium square(◻), black medium square(◼)
             # ballot box with check(☑), heavy multiplication x(✖)
@@ -298,16 +302,12 @@ def add_emoji(f, halfWidth, emojifontfile):
             xmin, ymin, xmax, ymax = g.boundingBox()
             boxh = ymax - ymin
             if boxh > f.em:  # 上下がはみ出る場合、収まるように縮める
+                g.transform(trcen)  # 縮小で下にずれないように上下中央に移動
                 g.transform(psMat.scale(1, f.em / boxh))
-                xmin, ymin, xmax, ymax = g.boundingBox()
-                boxh = ymax - ymin
-            # ymax位置をf.ascent+余白の位置に配置
-            # expect: f.ascent - (ymax + ydiff) = (emojifont.em - boxh) / 2
-            ydiff = f.ascent - ymax - (emojifont.em - boxh) / 2
-            g.transform(psMat.translate(0, ydiff))
+                g.transform(psMat.inverse(trcen))
             if ucode in range(0x1f1e6, 0x1f200):
-                # TODO: "Q"向けにbaseline考慮要
-                g.transform(psMat.scale(halfWidth / regional_indicator_maxboxw, 1))
+                # regional indicator symbol letter群は固定scaleで幅を縮める
+                g.transform(psMat.scale(regional_indicator_scale, 1))
                 g.width = halfWidth
                 centerInWidth(g)
             else:
