@@ -1,7 +1,7 @@
 #!/usr/bin/fontforge
 # East Asian Ambiguousなグリフの幅を半分に縮める
-#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf]
-#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNn Regular 0.0.1 source/NotoEmoji/static/NotoEmoji-Regular.ttf
+#   Usage: fontforge -script eaa2narrow.py <srcfont.ttf> <fontfamily> <fontstyle> <version> [emojifont.ttf] [emojifont2.ttf]
+#   Ex: fontforge -script eaa2narrow.py source/fontforge_export_BIZUDGothic-Regular.ttf UDEAWNo Regular 0.0.1 source/EmojiOneBW.otf source/NotoEmoji/static/NotoEmoji-SemiBold.ttf
 import datetime
 import math
 import sys
@@ -144,8 +144,10 @@ expect_narrow = (
 emojis = (
     0x203c, 0x2049, 0x20e3, 0x2122, 0x2139, 0x2194, 0x2195, 0x2196, 0x2197,
     0x2198, 0x2199, 0x21a9, 0x21aa, 0x2328, 0x23cf, 0x23ed, 0x23ee, 0x23ef,
-    0x23f1, 0x23f2, 0x23f8, 0x23f9, 0x23fa, 0x24c2, 0x25aa, 0x25ab, 0x25b6,
-    0x25c0, 0x25fb, 0x25fc, 0x2600, 0x2601, 0x2602, 0x2603, 0x2604, 0x260e,
+    0x23f1, 0x23f2, 0x23f8, 0x23f9, 0x23fa, 0x24c2, 0x25b6, 0x25c0,
+    # medium squareの縮小率に合わせてsmall squareを縮小するのでmedium->small順
+    0x25fb, 0x25fc, 0x25aa, 0x25ab,
+    0x2600, 0x2601, 0x2602, 0x2603, 0x2604, 0x260e,
     0x2611, 0x2618, 0x261d, 0x2620, 0x2622, 0x2623, 0x2626, 0x262a, 0x262e,
     0x262f, 0x2638, 0x2639, 0x263a, 0x2640, 0x2642, 0x265f, 0x2660, 0x2663,
     0x2665, 0x2666, 0x2668, 0x267b, 0x267e, 0x2692, 0x2694, 0x2695, 0x2696,
@@ -260,7 +262,7 @@ def g_warningsign(f, g, halfWidth):
     centerInWidth(g)
 
 
-def add_emoji(f, halfWidth, emojifontfile):
+def add_emoji(f, halfWidth, emojifontfile, emojilist, overwrite=False):
     """
     Ambiguous幅な絵文字や、
     fallbackフォントでWide幅だが、EastAsianWidth.txtで;Wでも;Fでもない絵文字を
@@ -280,20 +282,28 @@ def add_emoji(f, halfWidth, emojifontfile):
     if not emojifontfile:
         return
     emojifont = fontforge.open(emojifontfile)
+    emojifont.em = f.em  # EmojiOneBWは拡大
     ydiff, cy = getydiff()
     trcen = psMat.translate(0, -cy)
     # regional indicator symbol letter群用のscale。
     # 文字ごとにscaleがばらばらだとIだけ太くて違和感があるのでそろえる。
     regional_indicator_scale = halfWidth / maxboxwidth(emojifont, range(0x1f1e6, 0x1f200))
-    for ucode in emojis:
-        if ucode in f:  # BIZ UDゴシックに含まれていればそちらを使う
-            continue
+    for ucode in emojilist:
+        if not overwrite and ucode in f:
+            continue  # 既に含まれているグリフは上書きしない
         if ucode not in emojifont:
             continue
         g = emojifont[ucode]
         g.transform(psMat.translate(0, ydiff))
-        if ucode in (0x25fb, 0x25fc, 0x2611, 0x2716):
-            # white medium square(◻), black medium square(◼)
+        if ucode == 0x25fb:  # white medium square(◻)
+            scalewms = scalexy(g, halfWidth)
+        elif ucode == 0x25fc:  # black medium square(◼)
+            scalebms = scalexy(g, halfWidth)
+        elif ucode == 0x25ab:  # white small square(▫)
+            scalexy(g, halfWidth, scale=scalewms)
+        elif ucode == 0x25aa:  # black small square(▪)
+            scalexy(g, halfWidth, scale=scalebms)
+        elif ucode in (0x2611, 0x2716):
             # ballot box with check(☑), heavy multiplication x(✖)
             scalexy(g, halfWidth)  # 縦方向も横方向と同様に縮める
         elif ucode == 0x26a0:  # warning sign(⚠)
@@ -317,6 +327,16 @@ def add_emoji(f, halfWidth, emojifontfile):
         f.selection.select(ucode)
         f.paste()
     emojifont.close()
+
+
+def add_emoji2(f, halfWidth, emojifontfile2):
+    """EmojiOneBWに含まれない絵文字等をNotoEmojiから取込"""
+    if not emojifontfile2:
+        return
+    # EmojiOneBWのU+20E3(combining enclosing keycap)はつぶれて、
+    # 中の文字が見えないので、Noto Emojiから取り込み。
+    emoji2list = (0x20e3, 0x265f, 0x267e, 0x2695, 0x26a7)
+    add_emoji(f, halfWidth, emojifontfile2, emoji2list, overwrite=True)
 
 
 def g_twoDotLeader(f, halfWidth):
@@ -570,11 +590,19 @@ def g_circledBullet(f, halfWidth):
     centerInWidth(g)
 
 
-def scalexy(g, halfWidth):
+def scalexy(g, halfWidth, *, scale=0):
     """縦方向も横方向と同様に縮める"""
     xmin, ymin, xmax, ymax = g.boundingBox()
     boxw = xmax - xmin
-    scalex = halfWidth / (boxw + SIDE_BEARING)
+    if scale == 0:
+        scalex = halfWidth / (boxw + SIDE_BEARING)
+    elif boxw < halfWidth * 0.9:
+        # XXX:NotoEmojiのsmall squareを縮めすぎると見にくいのでそのままにする。
+        # medium squareはhalfWidth幅に縮小済なのでその幅より0.9未満ならば、
+        # 縮めずそのままにする。
+        scalex = 1
+    else:
+        scalex = scale
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
     trcen = psMat.translate(-cx, -cy)
@@ -583,6 +611,7 @@ def scalexy(g, halfWidth):
     g.transform(psMat.inverse(trcen))
     g.width = halfWidth
     centerInWidth(g)
+    return scalex
 
 
 def g_romanNumeralTwo(f, halfWidth):
@@ -1088,14 +1117,15 @@ def centerInWidth(g):
     g.width = w  # g.widthが縮む場合があるので再設定
 
 
-def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
+def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2):
     font = fontforge.open(fontfile)
 
     # 半角スペースから幅を取得
     halfWidth = font[0x0020].width
 
     add_variationSelector(font)
-    add_emoji(font, halfWidth, emojifontfile)
+    add_emoji(font, halfWidth, emojifontfile, emojis)
+    add_emoji2(font, halfWidth, emojifontfile2)
 
     # East Asian Ambiguousなグリフの幅を半分にする。
     g_greek(font, halfWidth)
@@ -1195,9 +1225,13 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
 
 
 if __name__ == '__main__':
-    # fontfile, fontfamily, fontstyle, version, emojifontfile
+    # fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
+    if len(sys.argv) > 6:
+        emojifontfile2 = sys.argv[6]
+    else:
+        emojifontfile2 = None
     if len(sys.argv) > 5:
         emojifontfile = sys.argv[5]
     else:
         emojifontfile = None
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile)
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], emojifontfile, emojifontfile2)
