@@ -609,26 +609,6 @@ def g_nearlyEqual(f, halfWidth):
     g.width = halfWidth
 
 
-def g_divide(f, halfWidth):
-    gref = f[0x003D]  # equal(=)
-    xminref, ymin, xmaxref, ymax = gref.boundingBox()
-    wref = xmaxref - xminref
-    g = f[0x00F7]  # divide(÷)
-    layer = g.layers[g.activeLayer]
-    xmin, ymin, xmax, ymax = layer.boundingBox()
-    w = xmax - xmin
-    dx = round((w - wref) / 2)
-    # -部分の端の点を移動
-    for p in layer[0]:
-        if p.x <= xmin:
-            p.x += dx
-        elif p.x >= xmax:
-            p.x -= dx
-    g.setLayer(layer, g.activeLayer)
-    g.width = halfWidth
-    centerInWidth(g)
-
-
 def trimleft(g, halfWidth):
     """左半分の点を、halfWidthに収まるように右に移動する"""
     layer = g.layers[g.activeLayer]
@@ -1012,7 +992,6 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_threeDotLeader(font, halfWidth)
     g_whiteStar(font, halfWidth)
     g_nearlyEqual(font, halfWidth)
-    g_divide(font, halfWidth)
     g_kome(font, halfWidth)
     g_therefore(font, halfWidth)
     g_because(font, halfWidth)
@@ -1034,7 +1013,10 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile):
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
     trimboth(font[0x00B1], halfWidth, SIDE_BEARING)  # plusminus(±)
+    trimboth(font[0x00F7], halfWidth, SIDE_BEARING)  # divide(÷)
+    trimboth(font[0x2260], halfWidth, SIDE_BEARING)  # notequal(≠)
     trimboth(font[0x22A5], halfWidth, SIDE_BEARING)  # perpendicular(⊥)
+    trimboth(font[0x2640], halfWidth, SIDE_BEARING)  # female(♀)
     trimright(font[0x2190], halfWidth)  # arrowleft(←)
     trimleft(font[0x2192], halfWidth)  # arrowright(→)
     trimleft(font[0x21D2], halfWidth)  # arrowdblright(⇒) XXX:寸詰りでバランス悪
