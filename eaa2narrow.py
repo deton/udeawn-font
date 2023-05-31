@@ -946,7 +946,7 @@ def g_because(f, halfWidth):
 
 
 def g_triangleDU(f, halfWidth):
-    scaleyfactor = 1.1  # 少しでも大きくなるように少しだけ縦長にする
+    scaleyfactor = 1.2  # 少しでも大きくなるように少しだけ縦長にする
     # black up-pointing triangle(▲)
     scalexy(f[0x25B2], halfWidth, scaleyfactor=scaleyfactor)
     # black down-pointing triangle(▼)
