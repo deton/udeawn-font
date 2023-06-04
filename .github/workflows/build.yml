@@ -16,22 +16,55 @@ jobs:
 
       - name: Build
         run: |
-          ./make-h.sh
+          ./make-n.sh
+          ./make-s.sh
+          ./make-o.sh
           ./make.sh
 
       - name: Make directories for upload-artifact
         run: |
-          mkdir UDEAWN_${{ github.ref_name }}
-          mv build/UDEAWN-* UDEAWN_${{ github.ref_name }}
-          mkdir UDEAWH_${{ github.ref_name }}
-          mv build/UDEAWH-* UDEAWH_${{ github.ref_name }}
+          mkdir UDEAWNi_${{ github.ref_name }}
+          mv build/UDEAWNi-* UDEAWNi_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNi_${{ github.ref_name }}
+          cp source/LICENSE_Illusion UDEAWNi_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNi_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNi UDEAWNi_${{ github.ref_name }}
+      - run: |
+          mkdir UDEAWNn_${{ github.ref_name }}
+          mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNn_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNn_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNn UDEAWNn_${{ github.ref_name }}
+      - run: |
+          mkdir UDEAWNs_${{ github.ref_name }}
+          mv build/UDEAWNs-* UDEAWNs_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNs_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNs UDEAWNs_${{ github.ref_name }}
+      - run: |
+          mkdir UDEAWNo_${{ github.ref_name }}
+          mv build/UDEAWNo-* UDEAWNo_${{ github.ref_name }}
+          cp source/LICENSE_BIZUDGothic UDEAWNo_${{ github.ref_name }}
+          cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
+          cp source/NotoEmoji/OFL.txt UDEAWNo_${{ github.ref_name }}/LICENSE_NotoEmoji
+          cp LICENSE_UDEAWNo UDEAWNo_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: UDEAWN_${{ github.ref_name }}
-          path: UDEAWN_${{ github.ref_name }}
+          name: UDEAWNi_${{ github.ref_name }}
+          path: UDEAWNi_${{ github.ref_name }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: UDEAWH_${{ github.ref_name }}
-          path: UDEAWH_${{ github.ref_name }}
+          name: UDEAWNn_${{ github.ref_name }}
+          path: UDEAWNn_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEAWNs_${{ github.ref_name }}
+          path: UDEAWNs_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEAWNo_${{ github.ref_name }}
+          path: UDEAWNo_${{ github.ref_name }}

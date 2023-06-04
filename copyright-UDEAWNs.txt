@@ -1,0 +1,8 @@
+[BIZ UDGothic]
+Copyright 2022 The BIZ UDGothic Project Authors (https://github.com/googlefonts/morisawa-biz-ud-gothic)
+
+[Noto Emoji SVG]
+Copyright 2013 Google Inc. (https://github.com/adobe-fonts/noto-emoji-svg/)
+
+[UDEAWN]
+Copyright (c) 2023 KIHARA, Hideto

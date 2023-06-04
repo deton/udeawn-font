@@ -12,7 +12,7 @@ fi
 VERSION="$1"
 FAMILYNAME="$2"
 DISP_FAMILYNAME="$3"
-DISP_FAMILYNAME_JP="UDEAWN"
+DISP_FAMILYNAME_JP="UDEAWNi"
 ITALIC_FLAG="$4"  # 0: 非イタリック 1: イタリック
 
 EM_ASCENT=1802
@@ -43,8 +43,8 @@ PATH_ILLU_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_ILLU_REGULAR
 PATH_ILLU_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_ILLU_BOLD"`
 #PATH_BIZUD_REGULAR=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_REGULAR"`
 #PATH_BIZUD_BOLD=`find $FONTS_DIRECTORIES -follow -name "$SRC_FONT_BIZUD_BOLD"`
-PATH_BIZUD_REGULAR='build/UDEAWH-Regular.ttf'
-PATH_BIZUD_BOLD='build/UDEAWH-Bold.ttf'
+PATH_BIZUD_REGULAR='build/UDEAWNn-Regular.ttf'
+PATH_BIZUD_BOLD='build/UDEAWNn-Bold.ttf'
 
 MODIFIED_FONT_ILLU_REGULAR='modified_illu_regular.sfd'
 MODIFIED_FONT_ILLU_BOLD='modified_illu_bold.sfd'
@@ -288,7 +288,6 @@ while (i < SizeOf(input_list))
   SetOS2Value("Weight", fontweight_list[i]) # Book or Bold
   SetOS2Value("Width",                   5) # Medium
   SetOS2Value("FSType",                  0)
-  SetOS2Value("VendorID",           "twr")
   SetOS2Value("IBMFamily",            2057) # SS Typewriter Gothic
   SetOS2Value("WinAscentIsOffset",       0)
   SetOS2Value("WinDescentIsOffset",      0)
