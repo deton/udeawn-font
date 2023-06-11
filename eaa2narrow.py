@@ -11,7 +11,7 @@ import psMat
 # 幅を縮小後に残しておく、左右side bearing(余白)の合計値。
 # 小さすぎる(60)と、U+2030(‰)がwslttyのCharNarrowing=75設定で縮められる場合あり
 # XXX:大きくしても(512)、ローマ数字(U+2161 Ⅱ等)は上記設定で縮められる模様
-SIDE_BEARING = 60
+SIDE_BEARING = 64
 
 # East Asian Ambiguousのリスト
 # のうち、BIZ UDゴシックで元々半分幅に収まっている文字
@@ -375,10 +375,7 @@ def g_threeDotLeader(f, halfWidth):
     centerInWidth(g)
 
 
-def g_whiteStar(f, halfWidth):
-    if 0x2606 not in f:
-        return
-    g = f[0x2606]  # white star(☆)
+def g_whiteStar(g, halfWidth, *, scaleinfactor=0.8, scaleyfactor=0):
     layer = g.layers[g.activeLayer]
     # 外側と内側の星で別の縮小率を使うので、ずれを回避するため、
     # bbox中心を原点に移動してから縮小したのち位置を戻す。(参考:cica.py)
@@ -386,11 +383,16 @@ def g_whiteStar(f, halfWidth):
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
     scale0 = halfWidth / (xmax - xmin + SIDE_BEARING)
+    if scaleyfactor == 0:
+        scaley = 1
+    else:
+        scaley = scale0 * scaleyfactor
     trcen = psMat.translate(-cx, -cy)
     layer.transform(trcen)
-    layer[0].transform(psMat.scale(scale0, 1))
+    layer[0].transform(psMat.scale(scale0, scaley))
     # 線が細くなりすぎないように、内側の星は外側(の縮小率)よりも縮める
-    layer[1].transform(psMat.scale(scale0 * 0.8, 0.8))
+    scale1 = scale0 * scaleinfactor
+    layer[1].transform(psMat.scale(scale1, scaley * scaleinfactor))
     layer.transform(psMat.inverse(trcen))
     g.setLayer(layer, g.activeLayer)
     g.width = halfWidth
@@ -590,7 +592,7 @@ def g_circledBullet(f, halfWidth):
     centerInWidth(g)
 
 
-def scalexy(g, halfWidth, *, scale=0):
+def scalexy(g, halfWidth, *, scale=0, scaleyfactor=1):
     """縦方向も横方向と同様に縮める"""
     xmin, ymin, xmax, ymax = g.boundingBox()
     boxw = xmax - xmin
@@ -603,11 +605,12 @@ def scalexy(g, halfWidth, *, scale=0):
         scalex = 1
     else:
         scalex = scale
+    scaley = scalex * scaleyfactor
     cx = (xmin + xmax) / 2
     cy = (ymin + ymax) / 2
     trcen = psMat.translate(-cx, -cy)
     g.transform(trcen)  # 中心を原点に移動。でないと高さ位置が低くなる
-    g.transform(psMat.scale(scalex, scalex))
+    g.transform(psMat.scale(scalex, scaley))
     g.transform(psMat.inverse(trcen))
     g.width = halfWidth
     centerInWidth(g)
@@ -942,19 +945,24 @@ def g_because(f, halfWidth):
     centerInWidth(g)
 
 
-def g_whiteTriangleDU(f, halfWidth):
-    # 単に幅を縮めると、斜め線が細くなって見にくいので補正
+def g_triangleDU(f, halfWidth):
+    scaleyfactor = 1.2  # 少しでも大きくなるように少しだけ縦長にする
+    # black up-pointing triangle(▲)
+    scalexy(f[0x25B2], halfWidth, scaleyfactor=scaleyfactor)
+    # black down-pointing triangle(▼)
+    scalexy(f[0x25BC], halfWidth, scaleyfactor=scaleyfactor)
+    # white up-pointing triangle(△)
+    g_whiteStar(f[0x25B3], halfWidth, scaleinfactor=0.9, scaleyfactor=scaleyfactor)
+    # white down-pointing triangle(▽)
+    g_whiteStar(f[0x25BD], halfWidth, scaleinfactor=0.9, scaleyfactor=scaleyfactor)
+
+    # 斜め線が細くなって見にくいので補正
     g = f[0x25BD]  # white down-pointing triangle(▽)
     layer = g.layers[g.activeLayer]
-    xmin, ymin, xmax, ymax = layer.boundingBox()
-    scalex = halfWidth / (xmax - xmin + SIDE_BEARING)
-
     # 計算を単純にするため外側三角の下点端が原点に来るように移動
     tip0 = layer[0][2]
     transy = psMat.translate(0, -tip0.y)
     layer.transform(psMat.compose(transy, psMat.translate(-tip0.x, 0)))
-    # 幅を縮める
-    layer.transform(psMat.scale(scalex, 1))
 
     c0 = layer[0]
     c1 = layer[1]
@@ -999,7 +1007,6 @@ def g_whiteTriangleDU(f, halfWidth):
     # white up-pointing triangle(△)
     g = f[0x25B3]
     layer = g.layers[g.activeLayer]
-    layer.transform(psMat.scale(scalex, 1))
     c1 = layer[1]
     c1[0].y -= dy
     c1[1].x += dxleft
@@ -1112,12 +1119,12 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
     g_cyrillic(font, halfWidth)
     g_twoDotLeader(font, halfWidth)
     g_threeDotLeader(font, halfWidth)
-    g_whiteStar(font, halfWidth)
+    g_whiteStar(font[0x2606], halfWidth)  # white star(☆)
     g_nearlyEqual(font, halfWidth)
     g_kome(font, halfWidth)
     g_therefore(font, halfWidth)
     g_because(font, halfWidth)
-    g_whiteTriangleDU(font, halfWidth)
+    g_triangleDU(font, halfWidth)
     g_arrowdblb(font, halfWidth)
     g_arrowupdn(font, halfWidth)
     g_infinity(font, halfWidth)
@@ -1127,10 +1134,12 @@ def main(fontfile, fontfamily, fontstyle, version, emojifontfile, emojifontfile2
     g_circle(font[0x25CB], halfWidth)  # circle(○)
     g_circle(font[0x25EF], halfWidth)  # large circle(◯)
     g_circle(font[0x25A1], halfWidth)  # white squre(□)
+    g_circle(font[0x25C7], halfWidth)  # white diamond(◇)
     g_bullseye(font, halfWidth)
     g_circledBullet(font, halfWidth)
     scalexy(font[0x25CF], halfWidth)  # black circle(●)
     scalexy(font[0x25A0], halfWidth)  # black squre(■)
+    scalexy(font[0x25C6], halfWidth)  # black diamond(◆)
     g_romanNumeralTwo(font, halfWidth)
     g_romanNumeralThree(font, halfWidth)
     g_boxDrawing(font, halfWidth)
