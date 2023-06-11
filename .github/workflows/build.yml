@@ -21,7 +21,7 @@ jobs:
           ./make-o.sh
           ./make.sh
 
-      - name: Make directories for upload-artifact
+      - name: Zip UDEAWNi
         run: |
           mkdir UDEAWNi_${{ github.ref_name }}
           mv build/UDEAWNi-* UDEAWNi_${{ github.ref_name }}
@@ -29,42 +29,62 @@ jobs:
           cp source/LICENSE_Illusion UDEAWNi_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNi_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNi UDEAWNi_${{ github.ref_name }}
-      - run: |
+          cd UDEAWNi_${{ github.ref_name }}
+          zip -9 ../UDEAWNi_${{ github.ref_name }}.zip .
+
+      - name: Zip UDEAWNn
+        run: |
           mkdir UDEAWNn_${{ github.ref_name }}
           mv build/UDEAWNn-* UDEAWNn_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNn_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNn_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNn UDEAWNn_${{ github.ref_name }}
-      - run: |
+          cd UDEAWNn_${{ github.ref_name }}
+          zip -9 ../UDEAWNn_${{ github.ref_name }}.zip .
+
+      - name: Zip UDEAWNs
+        run: |
           mkdir UDEAWNs_${{ github.ref_name }}
           mv build/UDEAWNs-* UDEAWNs_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNs_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNs UDEAWNs_${{ github.ref_name }}
-      - run: |
+          cd UDEAWNs_${{ github.ref_name }}
+          zip -9 ../UDEAWNs_${{ github.ref_name }}.zip .
+
+      - name: Zip UDEAWNo
+        run: |
           mkdir UDEAWNo_${{ github.ref_name }}
           mv build/UDEAWNo-* UDEAWNo_${{ github.ref_name }}
           cp source/LICENSE_BIZUDGothic UDEAWNo_${{ github.ref_name }}
           cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNo_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNo UDEAWNo_${{ github.ref_name }}
+          cd UDEAWNo_${{ github.ref_name }}
+          zip -9 ../UDEAWNo_${{ github.ref_name }}.zip .
 
       - uses: actions/upload-artifact@v3
         with:
           name: UDEAWNi_${{ github.ref_name }}
-          path: UDEAWNi_${{ github.ref_name }}
+          path: UDEAWNi_${{ github.ref_name }}.zip
 
       - uses: actions/upload-artifact@v3
         with:
           name: UDEAWNn_${{ github.ref_name }}
-          path: UDEAWNn_${{ github.ref_name }}
+          path: UDEAWNn_${{ github.ref_name }}.zip
 
       - uses: actions/upload-artifact@v3
         with:
           name: UDEAWNs_${{ github.ref_name }}
-          path: UDEAWNs_${{ github.ref_name }}
+          path: UDEAWNs_${{ github.ref_name }}.zip
 
       - uses: actions/upload-artifact@v3
         with:
           name: UDEAWNo_${{ github.ref_name }}
-          path: UDEAWNo_${{ github.ref_name }}
+          path: UDEAWNo_${{ github.ref_name }}.zip
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: gh release create ${{ github.ref_name }} -d ./UDEAWN*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
