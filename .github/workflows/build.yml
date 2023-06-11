@@ -29,7 +29,7 @@ jobs:
           cp source/LICENSE_Illusion UDEAWNi_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNi_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNi UDEAWNi_${{ github.ref_name }}
-          zip -j9 UDEAWNi_${{ github.ref_name }}.zip UDEAWNi_${{ github.ref_name }}
+          zip -j9 UDEAWNi_${{ github.ref_name }}.zip UDEAWNi_${{ github.ref_name }}/*
 
       - name: Zip UDEAWNn
         run: |
@@ -38,7 +38,7 @@ jobs:
           cp source/LICENSE_BIZUDGothic UDEAWNn_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNn_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNn UDEAWNn_${{ github.ref_name }}
-          zip -j9 UDEAWNn_${{ github.ref_name }}.zip UDEAWNn_${{ github.ref_name }}
+          zip -j9 UDEAWNn_${{ github.ref_name }}.zip UDEAWNn_${{ github.ref_name }}/*
 
       - name: Zip UDEAWNs
         run: |
@@ -47,7 +47,7 @@ jobs:
           cp source/LICENSE_BIZUDGothic UDEAWNs_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNs_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNs UDEAWNs_${{ github.ref_name }}
-          zip -j9 UDEAWNs_${{ github.ref_name }}.zip UDEAWNs_${{ github.ref_name }}
+          zip -j9 UDEAWNs_${{ github.ref_name }}.zip UDEAWNs_${{ github.ref_name }}/*
 
       - name: Zip UDEAWNo
         run: |
@@ -57,7 +57,7 @@ jobs:
           cp source/LICENSE_EmojiOneBW UDEAWNo_${{ github.ref_name }}
           cp source/NotoEmoji/OFL.txt UDEAWNo_${{ github.ref_name }}/LICENSE_NotoEmoji
           cp LICENSE_UDEAWNo UDEAWNo_${{ github.ref_name }}
-          zip -j9 UDEAWNo_${{ github.ref_name }}.zip UDEAWNo_${{ github.ref_name }}
+          zip -j9 UDEAWNo_${{ github.ref_name }}.zip UDEAWNo_${{ github.ref_name }}/*
 
       - uses: actions/upload-artifact@v3
         with:
